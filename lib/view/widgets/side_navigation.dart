@@ -2,6 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
+import '../constants/constants.dart';
+import '../screens/activity/driver/DriverHomeInit.dart';
+import '../screens/activity/driver/driver_dashboard.dart';
+import '../screens/activity/paymentSelection/payment_selection_activity.dart';
+import '../screens/activity/setup/login_activity.dart';
 import 'logger_widget.dart';
 
 Drawer buildDrawer({
@@ -59,48 +64,25 @@ Drawer buildDrawer({
               ),
             ),
           ),
-          isDriver
-              ? menuButton(
-                  title: "Home",
-                  icon: Icons.home,
-                  function: () {
-                    Navigator.pushNamed(context, DriverHomeInit.id);
-                  },
-                )
-              : menuButton(
-                  title: "Home",
-                  icon: Icons.home,
-                  function: () {
-                    Navigator.pushNamed(context, MapActivity.id);
-                  },
-                ),
-          isDriver
-              ? menuButton(
-                  title: "Dashboard",
-                  icon: FontAwesome.dashboard,
-                  function: () {
-                    Navigator.pushNamed(context, DriverDashboard.id);
-                  },
-                )
-              : menuButton(
-                  title: "Profile",
-                  icon: FontAwesome.user,
-                  function: () {
-                    //    Navigator.pushNamed(context, DriverDashboard.id);
-                  },
-                ),
+          menuButton(
+            title: "Home",
+            icon: Icons.home,
+            function: () {
+              Navigator.pushNamed(context, DriverHomeInit.id);
+            },
+          ),
+          menuButton(
+            title: "Dashboard",
+            icon: FontAwesome.dashboard,
+            function: () {
+              Navigator.pushNamed(context, DriverDashboard.id);
+            },
+          ),
           menuButton(
             title: "Card and Payments",
             icon: Icons.credit_card_rounded,
             function: () {
               Navigator.pushNamed(context, PaymentSelectionActivity.id);
-            },
-          ),
-          menuButton(
-            title: "Trip History",
-            icon: FontAwesome.bell,
-            function: () {
-              Navigator.pushNamed(context, TripHistoryPro.id);
             },
           ),
           menuButton(

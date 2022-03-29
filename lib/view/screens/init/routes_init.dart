@@ -1,7 +1,27 @@
+import 'package:bookie_driver/view/screens/activity/driver/CallScreen.dart';
+import 'package:bookie_driver/view/screens/activity/driver/DriverHomeInit.dart';
+import 'package:bookie_driver/view/screens/activity/driver/accountDetails.dart';
+import 'package:bookie_driver/view/screens/activity/driver/driverOTP.dart';
+import 'package:bookie_driver/view/screens/activity/driver/driver_dashboard.dart';
+import 'package:bookie_driver/view/screens/activity/driver/driver_sign_up.dart';
+import 'package:bookie_driver/view/screens/activity/driver/message_screen.dart';
+import 'package:bookie_driver/view/screens/activity/driver/onTrip.dart';
+import 'package:bookie_driver/view/screens/activity/home_activity.dart';
+import 'package:bookie_driver/view/screens/activity/paymentSelection/payment_selection_activity.dart';
+import 'package:bookie_driver/view/screens/activity/setup/email_confirmation.dart';
+import 'package:bookie_driver/view/screens/activity/setup/introduction_screen.dart';
+import 'package:bookie_driver/view/screens/activity/setup/login_activity.dart';
+import 'package:bookie_driver/view/screens/activity/setup/password_reset.dart';
+import 'package:bookie_driver/view/screens/activity/setup/registration_activity.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../provider/shared_prefrence_provider.dart';
 import '../../constants/constants.dart';
+import '../activity/driver/driverPasswordReset.dart';
+import '../activity/driver/driver_picture.dart';
+import '../activity/driver/vechileDetails.dart';
+import '../activity/paymentSelection/addCard.dart';
+import '../activity/setup/forgot_password.dart';
 
 class RoutesInit extends StatefulWidget {
   const RoutesInit({Key? key}) : super(key: key);
@@ -43,7 +63,6 @@ class _RoutesInitState extends State<RoutesInit> {
             routes: {
               DriverHomeInit.id: (context) => DriverHomeInit(),
               AddCard.id: (context) => AddCard(),
-              CreatePaymentMEthods.id: (context) => CreatePaymentMEthods(),
               DriverPasswordReset.id: (context) => DriverPasswordReset(),
               DriverPicture.id: (context) => DriverPicture(),
               DriverOTP.id: (context) => DriverOTP(
@@ -57,37 +76,13 @@ class _RoutesInitState extends State<RoutesInit> {
               HomeActivity.id: (context) => HomeActivity(),
               LoginActivity.id: (context) => LoginActivity(),
               RegistrationActivity.id: (context) => RegistrationActivity(),
-              MapActivity.id: (context) => MapActivity(),
-              LocationSelectorActivity.id: (context) =>
-                  LocationSelectorActivity(),
-              TripSelection.id: (context) => TripSelection(
-                    tripModel: TripModel(
-                      startLatitude: "",
-                      startLongitude: "",
-                      endLongitude: "",
-                      endLatitude: "",
-                      userId: "",
-                    ),
-                  ),
               PaymentSelectionActivity.id: (context) =>
                   PaymentSelectionActivity(),
               DriverDashboard.id: (context) => DriverDashboard(),
-              TripHistory.id: (context) => TripHistory(),
-              TripHistoryPro.id: (context) => TripHistoryPro(),
-              UserTrips.id: (context) => UserTrips(),
-              TripDetails.id: (context) => TripDetails(),
               ForgotPassword.id: (context) => ForgotPassword(),
               EmailConfirmation.id: (context) => EmailConfirmation(),
-              TripData.id: (context) => TripData(),
-              TripComplete.id: (context) => TripComplete(),
-              TripPending.id: (context) => TripPending(),
               PasswordReset.id: (context) => PasswordReset(),
-              Prefrences.id: (context) => Prefrences(),
-              TripDescription.id: (context) => TripDescription(),
-              DriverScan.id: (context) => DriverScan(),
               OnTrip.id: (context) => OnTrip(),
-              TripRating.id: (context) => TripRating(),
-              ReportDriver.id: (context) => ReportDriver(),
               MessageScreen.id: (context) => MessageScreen(),
               CallScreen.id: (context) => CallScreen(),
             },
