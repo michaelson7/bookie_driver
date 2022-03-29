@@ -1,0 +1,83 @@
+name: bookie_driver
+description: A new Flutter project.
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.16.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.2
+  http: ^0.13.3
+  provider: ^5.0.0
+  google_fonts: ^2.1.0
+  cached_network_image: ^3.0.0
+  rxdart: ^0.27.0
+  shared_preferences: ^2.0.6
+  logger: ^1.0.0
+  #geolocator: ^7.4.1
+  geocoding: ^2.0.4
+  flutter_icons: ^1.1.0
+  flutter_map: ^0.14.0
+  latlong2: ^0.8.0
+  get: ^4.3.8
+  modal_progress_hud_nsn: ^0.1.0-nullsafety-1
+  syncfusion_flutter_charts: ^19.3.44+1
+  #  image_picker: ^0.8.4+4
+  dio: ^4.0.1
+  timeago: ^3.1.0
+  flutter_launcher_icons: ^0.9.1
+  intl: ^0.17.0
+  onboarding: ^2.1.0
+  percent_indicator: ^4.0.0
+  introduction_screen: ^2.1.0
+  flutter_rating_bar: ^4.0.0
+  timelines: ^0.1.0
+  timeline_tile: ^2.0.0
+  otp_text_field: ^1.1.2
+  bubble_tab_indicator: "^0.1.5"
+  flutter_native_splash: ^2.0.2
+  flutter_svg: ^1.0.3
+  flare_flutter: ^3.0.2
+  location: ^4.2.0
+  dotted_border: ^2.0.0+2
+  flutter_countdown_timer: ^4.1.0
+  chat_bubbles: ^1.2.0
+  graphql_flutter: ^5.0.1
+  draggable_bottom_sheet: ^0.1.2
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logo.png"
+  adaptive_icon_background: "#714664"
+
+flutter_native_splash:
+  background_image: assets/images/splashBackground.png
+  image: assets/images/splashImagePro.png
+  fullscreen: true
+  android: true
+  ios: true
+  web: false
+  android12: false
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^1.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins/Poppins-Medium.ttf
+
