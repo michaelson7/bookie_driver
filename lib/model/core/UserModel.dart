@@ -1,5 +1,5 @@
 class UserModel {
-  String email, phoneNumber, firstName, lastName, password, id;
+  String email, phoneNumber, firstName, lastName, password, id, photo;
 
   UserModel({
     required this.email,
@@ -8,5 +8,6 @@ class UserModel {
     required this.lastName,
     required this.password,
     required this.id,
+    required this.photo,
   });
 }

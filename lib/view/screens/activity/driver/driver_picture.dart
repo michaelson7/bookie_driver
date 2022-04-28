@@ -1,13 +1,25 @@
+import 'dart:io';
+import 'package:bookie_driver/model/core/SkillsModel.dart';
+import 'package:bookie_driver/model/core/UploadPhotoResponse.dart';
+import 'package:bookie_driver/model/core/driverResponseModel.dart';
+import 'package:bookie_driver/model/core/forgotPasswordResponse.dart';
+import 'package:bookie_driver/provider/SkillsProvider.dart';
 import 'package:bookie_driver/view/screens/activity/driver/vechileDetails.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:bookie_driver/view/widgets/PopUpDialogs.dart';
+import 'package:bookie_driver/view/widgets/logger_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:graphql/src/core/query_result.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../../provider/RegistrationProvider.dart';
 import '../../../../provider/shared_prefrence_provider.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/enum.dart';
 import '../../../widgets/gradientButton.dart';
-import 'driverPasswordReset.dart';
+import '../../../widgets/toast.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:http_parser/http_parser.dart';
 
 class DriverPicture extends StatefulWidget {
   static String id = "DriverPicture";
@@ -20,6 +32,12 @@ class DriverPicture extends StatefulWidget {
 // Navigator.popAndPushNamed(context, LoginActivity.id);
 class _HomeActivityState extends State<DriverPicture> {
   SharedPreferenceProvider _sp = SharedPreferenceProvider();
+  bool selectedImage = false,
+      selectedLicenceFront = false,
+      selectedLicenseBack = false;
+  TextEditingController nrcController = TextEditingController();
+  File? profileFile, licenceFontFile, licenseBackFile;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,25 +73,45 @@ class _HomeActivityState extends State<DriverPicture> {
             Container(
               child: Align(
                 alignment: Alignment.bottomRight,
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Icon(
-                    Icons.camera_alt,
-                    color: Colors.grey,
+                child: InkWell(
+                  onTap: () async {
+                    var image = await imageSelection(useCamera: false);
+                    if (image != null) {
+                      setState(() {
+                        selectedImage = true;
+                        profileFile = File(image.path);
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8)),
+                    child: Icon(
+                      Icons.camera_alt,
+                      color: Colors.grey,
+                    ),
                   ),
                 ),
               ),
               height: MediaQuery.of(context).size.width - 220,
               width: MediaQuery.of(context).size.width - 220,
               decoration: BoxDecoration(
+                color: Colors.white60,
                 borderRadius: BorderRadius.circular(100),
-                image: DecorationImage(
-                  image: AssetImage('assets/images/1234.png'),
-                  fit: BoxFit.cover,
-                ),
+                image: selectedImage
+                    ? DecorationImage(
+                        image: FileImage(profileFile!),
+                        fit: BoxFit.cover,
+                      )
+                    : DecorationImage(
+                        fit: BoxFit.cover,
+                        image: Image.asset(
+                          "assets/images/1234.png",
+                          fit: BoxFit.cover,
+                        ).image,
+                      ),
               ),
             ),
             Text(
@@ -81,26 +119,80 @@ class _HomeActivityState extends State<DriverPicture> {
               style: kTextStyleWhite,
             ),
             SizedBox(height: 20),
-            options(
-              hint: "License ID",
-              hintPro: "Front",
-              showIcon: true,
+            InkWell(
+              onTap: () async {
+                var image = await imageSelection(useCamera: false);
+                if (image != null) {
+                  setState(() {
+                    selectedLicenceFront = true;
+                    licenceFontFile = File(image.path);
+                  });
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  options(
+                    hint: "License ID",
+                    hintPro: "Front",
+                    showIcon: true,
+                  ),
+                  selectedLicenceFront
+                      ? ElevatedButton(
+                          onPressed: () {
+                            showImage(licenceFontFile!);
+                          },
+                          child: const Text("Preview"))
+                      : const SizedBox()
+                ],
+              ),
             ),
-            options(
-              hint: "LicenseID",
-              hintPro: "Black",
-              showIcon: true,
+            InkWell(
+              onTap: () async {
+                var image = await imageSelection(useCamera: false);
+                if (image != null) {
+                  setState(() {
+                    selectedLicenseBack = true;
+                    licenseBackFile = File(image.path);
+                  });
+                }
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  options(
+                    hint: "License ID",
+                    hintPro: "Baxk",
+                    showIcon: true,
+                  ),
+                  selectedLicenseBack
+                      ? ElevatedButton(
+                          onPressed: () {
+                            showImage(licenseBackFile!);
+                          },
+                          child: const Text("Preview"),
+                        )
+                      : const SizedBox()
+                ],
+              ),
             ),
+            // options(
+            //   hint: "NRC Number",
+            //   hintPro: "NRC Number",
+            //   controller: nrcController,
+            // ),
             options(
               hint: "Address",
-              hintPro: "",
+              hintPro: "Address",
+              controller: nrcController,
+              // controller: nrcController,
             ),
             SizedBox(height: 60),
             gradientButton(
               function: () {
-                Navigator.popAndPushNamed(context, VechileDetails.id);
+                submitData();
               },
-              title: "Login",
+              title: "Create",
             ),
           ],
         ),
@@ -112,6 +204,7 @@ class _HomeActivityState extends State<DriverPicture> {
     required hint,
     required hintPro,
     bool showIcon = false,
+    TextEditingController? controller,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
@@ -132,11 +225,12 @@ class _HomeActivityState extends State<DriverPicture> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25),
-                    child: TextField(
-                      style: TextStyle(
+                    child: TextFormField(
+                      style: const TextStyle(
                         color: Colors.black,
                       ),
-                      decoration: new InputDecoration(
+                      controller: controller,
+                      decoration: InputDecoration(
                         hintStyle: TextStyle(color: Colors.grey),
                         fillColor: Colors.grey,
                         border: InputBorder.none,
@@ -146,8 +240,8 @@ class _HomeActivityState extends State<DriverPicture> {
                   ),
                 ),
                 showIcon
-                    ? Padding(
-                        padding: const EdgeInsets.all(12),
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
                         child: Icon(
                           Icons.camera_alt,
                           color: Colors.grey,
@@ -160,5 +254,130 @@ class _HomeActivityState extends State<DriverPicture> {
         ],
       ),
     );
+  }
+
+  Future<void> submitData() async {
+    var provider = RegistrationProvider();
+    var skillProvider = SkillsProvider();
+    if (!selectedImage) {
+      toastMessage(context: context, message: "Please select profile photo");
+    } else if (!selectedLicenceFront) {
+      toastMessage(context: context, message: "Please select front license");
+    } else if (!selectedLicenseBack) {
+      toastMessage(context: context, message: "Please select back license");
+    } else if (nrcController.text == "") {
+      toastMessage(context: context, message: "Please enter Address");
+    } else {
+      //setImage
+      var dialog = PopUpDialogs(context: context);
+      dialog.showLoadingAnimation(context: context);
+      var data = await provider.getUserId();
+      var skills = await skillProvider.allSkillsRequest();
+      var photoResponse = await setProfilePhoto(provider, data);
+      if (photoResponse.uploadProfilePicture!.success!) {
+        var driverResponse = await driverReg(data, skills, provider);
+        dialog.closeDialog();
+        loggerAccent(message: driverResponse.toJson().toString());
+        if (driverResponse.createDriver!.response == 200) {
+          loggerError(message: "message");
+          Navigator.popAndPushNamed(context, VechileDetails.id);
+        } else {
+          toastMessage(
+            context: context,
+            message: "${driverResponse.createDriver?.message}",
+          );
+        }
+      } else {
+        dialog.closeDialog();
+        toastMessage(
+          context: context,
+          message: "Error while uploading profile photo",
+        );
+      }
+    }
+  }
+
+  Future<DriverResponseModel> driverReg(QueryResult<dynamic> data,
+      SkillsModel skills, RegistrationProvider provider) async {
+    var responseBody = data.data;
+    var response = responseBody!["me"];
+    var userID = response["pk"];
+    var photoName = '${DateTime.now().second}.jpg';
+    var byteData = licenceFontFile?.readAsBytesSync();
+    var multipartFile = http.MultipartFile.fromBytes(
+      'photo',
+      byteData!,
+      filename: photoName,
+      contentType: MediaType("image", "jpg"),
+    );
+    var jsonBody = {
+      "user": "$userID",
+      "address": nrcController.text,
+      "skills": skills.allSkills?.first.id,
+      "license": multipartFile,
+    };
+    var driverRegistration = await provider.CreateDriver(
+      jsonBody: jsonBody,
+    );
+    return driverRegistration;
+  }
+
+  Future<UploadPhotoResponse> setProfilePhoto(
+      RegistrationProvider provider, QueryResult<dynamic> data) async {
+    var data = await provider.getUserId();
+    var responseBody = data.data;
+    var response = responseBody!["me"];
+    var userID = response["pk"];
+    var photoName = '${DateTime.now().second}.jpg';
+    var byteData = profileFile?.readAsBytesSync();
+    var multipartFile = http.MultipartFile.fromBytes(
+      'photo',
+      byteData!,
+      filename: photoName,
+      contentType: MediaType("image", "jpg"),
+    );
+    var imageResponse = await provider.updateProfilePhoto(
+      userId: userID,
+      photo: multipartFile,
+    );
+    if (imageResponse.uploadProfilePicture!.success!) {
+      await _sp.setString(
+        key: getEnumValue(UserDetails.userPhoto),
+        value: "https://bookie-media.s3.af-south-1.amazonaws.com/" +
+            "${imageResponse.uploadProfilePicture?.profilePicture?.image}",
+      );
+    }
+    return imageResponse;
+  }
+
+  Future<XFile?> imageSelection({
+    required bool useCamera,
+  }) async {
+    try {
+      ImagePicker _picker = ImagePicker();
+      XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+      );
+      return image;
+    } catch (e) {
+      toastMessage(context: context, message: e.toString());
+    }
+  }
+
+  showImage(File licenceFontFile) {
+    showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: kAccent,
+            contentPadding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            content: Container(
+              child: Image.file(licenceFontFile),
+            ),
+          );
+        });
   }
 }

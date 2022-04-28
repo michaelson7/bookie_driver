@@ -95,7 +95,8 @@ class _HomeActivityState extends State<DriverOTP> {
                           key: "AccountType",
                           value: "driver",
                         );
-                        await registerAsDriver();
+                        // await registerAsDriver();
+                        Navigator.popAndPushNamed(context, DriverPicture.id);
                       } else {
                         dialogs!.closeDialog();
                         toastMessage(
@@ -182,55 +183,6 @@ class _HomeActivityState extends State<DriverOTP> {
         ],
       ),
     );
-  }
-
-  Future<dynamic> registerAsDriver() async {
-    RegistrationProvider provider = RegistrationProvider();
-    var data = await provider.getUserId();
-
-    if (!data.hasException) {
-      var responseBody = data.data;
-      var response = responseBody!["me"];
-      var userID = response["pk"];
-
-      //register driver
-      var jsonBody = {"user": "$userID", "nrcNumber": "4", "skills": "1"};
-      var driverRegistration = await provider.CreateDriver(
-        jsonBody: jsonBody,
-      );
-
-      //driver response
-      if (!driverRegistration.hasException) {
-        var responseBody = driverRegistration.data;
-        var response = responseBody!["createDriver"];
-        if (response!["response"] == 200) {
-          dialogs!.closeDialog();
-          toastMessage(
-            context: context,
-            message: "Driver Registration Successful",
-          );
-          Navigator.popAndPushNamed(context, DriverPicture.id);
-        } else {
-          dialogs!.closeDialog();
-          toastMessage(
-            context: context,
-            message: "Error, ${response["message"]}",
-          );
-        }
-      } else {
-        dialogs!.closeDialog();
-        toastMessage(
-          context: context,
-          message: "Error, ${data.exception.toString()}",
-        );
-      }
-    } else {
-      dialogs!.closeDialog();
-      toastMessage(
-        context: context,
-        message: "Error, ${data.exception.toString()}",
-      );
-    }
   }
 
   Future<QueryResult> generateToken() async {

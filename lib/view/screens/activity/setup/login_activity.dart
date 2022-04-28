@@ -5,9 +5,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
+import '../../../../model/core/UserDataModel.dart';
 import '../../../../provider/RegistrationProvider.dart';
 import '../../../../provider/shared_prefrence_provider.dart';
 import '../../../constants/constants.dart';
+import '../../../constants/enum.dart';
 import '../../../constants/mutations.dart';
 
 import '../../../widgets/PopUpDialogs.dart';
@@ -35,31 +38,51 @@ class _HomeActivityState extends State<LoginActivity> {
   SharedPreferenceProvider _sharedPreferenceProvider =
       SharedPreferenceProvider();
   final _formKey = GlobalKey<FormState>();
-  bool isDriverSignUp = true;
+  bool isDriverSignUp = true, rememberMe = false;
+  bool _passwordVisible = false;
+  bool isLoading = true;
 
   @override
   void initState() {
-    passwordController.text = "Password123!";
-    userNameController.text = "0954512435";
+    getData();
     super.initState();
+  }
+
+  getData() async {
+    var tempPassword = await _sharedPreferenceProvider.getStringValue(
+      getEnumValue(UserDetails.password),
+    );
+    var tempNumber = await _sharedPreferenceProvider.getStringValue(
+      getEnumValue(UserDetails.number),
+    );
+    setState(() {
+      passwordController.text = tempPassword ?? "";
+      userNameController.text = tempNumber ?? "";
+      isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/images/shortBackground.png"),
-                alignment: Alignment.topCenter,
-                fit: BoxFit.fitWidth,
+      body: ModalProgressHUD(
+        inAsyncCall: isLoading,
+        child: Stack(
+          children: [
+            SizedBox(
+              child: Container(
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage("assets/images/Group 10.png"),
+                    alignment: Alignment.topCenter,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             ),
-          ),
-          buildContainer(),
-        ],
+            buildContainer(),
+          ],
+        ),
       ),
     );
   }
@@ -82,14 +105,18 @@ class _HomeActivityState extends State<LoginActivity> {
 
   Widget loginBody() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Image.asset("assets/images/logo.png", height: 160.0),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Image.asset("assets/images/logo.png", height: 80.0),
+          ),
           Form(
             key: _formKey,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Material(
                   borderRadius: kBorderRadiusCircular,
@@ -106,17 +133,18 @@ class _HomeActivityState extends State<LoginActivity> {
                       controller: userNameController,
                       decoration: new InputDecoration(
                         border: InputBorder.none,
+                        labelText: 'Phone Number',
                         hintText: 'Enter Phone Number',
                       ),
                     ),
                   ),
                 ),
-                Divider(color: Colors.grey),
+                SizedBox(height: 15),
                 Material(
                   borderRadius: kBorderRadiusCircular,
                   color: Colors.grey[200],
                   child: ListTile(
-                    leading: Icon(FontAwesome.eye, color: Colors.black),
+                    leading: Icon(FontAwesome.lock, color: Colors.black),
                     title: TextFormField(
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -125,21 +153,55 @@ class _HomeActivityState extends State<LoginActivity> {
                         return null;
                       },
                       controller: passwordController,
-                      onChanged: (value) {
-                        setState(() {});
-                      },
-                      obscureText: true,
+                      obscureText: !_passwordVisible,
                       decoration: new InputDecoration(
                         border: InputBorder.none,
+                        labelText: 'Password',
                         hintText: 'Enter Password',
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _passwordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Theme.of(context).primaryColorDark,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _passwordVisible = !_passwordVisible;
+                            });
+                          },
+                        ),
                       ),
                     ),
+                  ),
+                ),
+                SizedBox(height: 15),
+                ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 0.0,
+                    vertical: 0.0,
+                  ),
+                  visualDensity: VisualDensity(horizontal: 0, vertical: -4),
+                  leading: Checkbox(
+                    value: rememberMe,
+                    checkColor: kAccent,
+                    fillColor: MaterialStateProperty.all<Color>(Colors.white),
+                    onChanged: (value) {
+                      setState(() {
+                        rememberMe = value!;
+                      });
+                    },
+                  ),
+                  title: Text(
+                    "Remember Password",
+                    style: kTextStyleWhite,
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 35),
+          SizedBox(height: 15),
           SizedBox(
             width: double.infinity,
             child: gradientButton(
@@ -160,7 +222,7 @@ class _HomeActivityState extends State<LoginActivity> {
             ),
           ),
           SizedBox(height: 90),
-          socialSignIn(),
+          //   socialSignIn(),
         ],
       ),
     );
@@ -177,22 +239,35 @@ class _HomeActivityState extends State<LoginActivity> {
       number: userNameController.text,
       password: passwordController.text,
     );
-    popUpDialogs.closeDialog();
+
     if (!data.hasException) {
       var response = data.data;
       bool responseVal = response!["tokenAuth"]["success"];
       if (responseVal) {
-        toastMessage(context: context, message: "Registration Successful");
-        _sharedPreferenceProvider.setString(
-          key: "AccountType",
-          value: isDriverSignUp ? "driver" : "ordinary",
+        var responseVal = await _registrationProvider.getUserId();
+        UserDataModel userDataModel = UserDataModel.fromJson(
+          responseVal.data!,
         );
-        Navigator.popAndPushNamed(context, DriverHomeInit.id);
+        popUpDialogs.closeDialog();
+        if (userDataModel.me!.driverSet!.isNotEmpty) {
+          toastMessage(context: context, message: "Authentication Successful");
+          _sharedPreferenceProvider.setString(
+            key: "AccountType",
+            value: "driver",
+          );
+          Navigator.popAndPushNamed(context, DriverHomeInit.id);
+        } else {
+          toastMessage(
+            context: context,
+            message: "Please sign in with driver account",
+          );
+        }
       } else {
-        toastMessage(
-            context: context, message: "Error, Invalid credentials passed");
+        popUpDialogs.closeDialog();
+        toastMessage(context: context, message: "Account does not exist");
       }
     } else {
+      popUpDialogs.closeDialog();
       toastMessage(
         context: context,
         message: "Error, ${data.exception.toString()}",

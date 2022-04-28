@@ -1,12 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-
+import '../../../../provider/RegistrationProvider.dart';
 import '../../../constants/constants.dart';
+import '../../../widgets/PopUpDialogs.dart';
+import '../../../widgets/toast.dart';
 import 'email_confirmation.dart';
 
-class ForgotPassword extends StatelessWidget {
+class ForgotPassword extends StatefulWidget {
   static String id = "ForgotPassword";
   const ForgotPassword({Key? key}) : super(key: key);
+
+  @override
+  State<ForgotPassword> createState() => _ForgotPasswordState();
+}
+
+class _ForgotPasswordState extends State<ForgotPassword> {
+  TextEditingController emailController = TextEditingController();
+  var _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -57,27 +67,31 @@ class ForgotPassword extends StatelessWidget {
                   child:
                       Center(child: Image.asset("assets/images/ladylady.png")),
                 ),
-                Column(
-                  children: [
-                    Text(
-                      "Forgot Password",
-                      style: kTextStyleHeader1,
-                    ),
-                    Divider(color: Colors.grey),
-                    Material(
-                      borderRadius: kBorderRadiusCircular,
-                      color: Colors.grey[200],
-                      child: ListTile(
-                        leading: Icon(FontAwesome.envelope),
-                        title: TextField(
-                          decoration: new InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Enter Email',
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      Text(
+                        "Forgot Password",
+                        style: kTextStyleHeader1,
+                      ),
+                      Divider(color: Colors.grey),
+                      Material(
+                        borderRadius: kBorderRadiusCircular,
+                        color: Colors.grey[200],
+                        child: ListTile(
+                          leading: Icon(FontAwesome.envelope),
+                          title: TextFormField(
+                            controller: emailController,
+                            decoration: new InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Enter Email',
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -95,9 +109,32 @@ class ForgotPassword extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: InkWell(
-              onTap: () {
-                //Navigator.popAndPushNamed(context, MapActivity.id);
-                Navigator.popAndPushNamed(context, EmailConfirmation.id);
+              onTap: () async {
+                if (_formKey.currentState!.validate()) {
+                  var dialog = PopUpDialogs(context: context);
+                  var provider = RegistrationProvider();
+                  dialog.showLoadingAnimation(context: context);
+                  //
+                  var response = await provider.forgotPasswords(
+                      email: emailController.text);
+                  dialog.closeDialog();
+                  if (response.responseBody?.response == 200) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            EmailConfirmation(email: emailController.text),
+                      ),
+                    );
+                  } else {
+                    toastMessage(
+                      context: context,
+                      message: response.responseBody?.message,
+                    );
+                  }
+                } else {
+                  toastMessage(context: context, message: "Please Add Email");
+                }
               },
               child: Container(
                 decoration: BoxDecoration(

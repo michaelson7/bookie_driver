@@ -1,6 +1,6 @@
 import 'package:bookie_driver/view/screens/activity/driver/CallScreen.dart';
 import 'package:bookie_driver/view/screens/activity/driver/DriverHomeInit.dart';
-import 'package:bookie_driver/view/screens/activity/driver/accountDetails.dart';
+import 'package:bookie_driver/view/screens/activity/driver/BusinessRegistration.dart';
 import 'package:bookie_driver/view/screens/activity/driver/driverOTP.dart';
 import 'package:bookie_driver/view/screens/activity/driver/driver_dashboard.dart';
 import 'package:bookie_driver/view/screens/activity/driver/driver_sign_up.dart';
@@ -19,6 +19,7 @@ import '../../../provider/shared_prefrence_provider.dart';
 import '../../constants/constants.dart';
 import '../activity/driver/driverPasswordReset.dart';
 import '../activity/driver/driver_picture.dart';
+import '../activity/driver/profileScreen.dart';
 import '../activity/driver/vechileDetails.dart';
 import '../activity/paymentSelection/addCard.dart';
 import '../activity/setup/forgot_password.dart';
@@ -70,7 +71,7 @@ class _RoutesInitState extends State<RoutesInit> {
                     password: "",
                   ),
               VechileDetails.id: (context) => VechileDetails(),
-              DriverAccountDetails.id: (context) => DriverAccountDetails(),
+              BusinessRegistration.id: (context) => BusinessRegistration(),
               DriverSignUp.id: (context) => DriverSignUp(),
               IntroScreen.id: (context) => IntroScreen(),
               HomeActivity.id: (context) => HomeActivity(),
@@ -78,13 +79,10 @@ class _RoutesInitState extends State<RoutesInit> {
               RegistrationActivity.id: (context) => RegistrationActivity(),
               PaymentSelectionActivity.id: (context) =>
                   PaymentSelectionActivity(),
-              DriverDashboard.id: (context) => DriverDashboard(),
               ForgotPassword.id: (context) => ForgotPassword(),
-              EmailConfirmation.id: (context) => EmailConfirmation(),
-              PasswordReset.id: (context) => PasswordReset(),
-              OnTrip.id: (context) => OnTrip(),
               MessageScreen.id: (context) => MessageScreen(),
               CallScreen.id: (context) => CallScreen(),
+              ProfileScreen.id: (context) => ProfileScreen(),
             },
           );
   }

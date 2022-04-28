@@ -1,37 +1,31 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:bookie_driver/model/core/AddDriverLocationModel.dart';
 import 'package:bookie_driver/model/core/UserDataModel.dart';
 import 'package:bookie_driver/provider/DriverProvider.dart';
+import 'package:bookie_driver/provider/GoogleMapProvider.dart';
 import 'package:bookie_driver/provider/RegistrationProvider.dart';
 import 'package:bookie_driver/provider/TripProvider.dart';
 import 'package:bookie_driver/provider/location_provider.dart';
 import 'package:bookie_driver/provider/shared_prefrence_provider.dart';
 import 'package:bookie_driver/view/constants/constants.dart';
-import 'package:bookie_driver/view/screens/activity/driver/driver_dashboard.dart';
-import 'package:bookie_driver/view/screens/activity/setup/login_activity.dart';
+import 'package:bookie_driver/view/widgets/gradientButton.dart';
 import 'package:bookie_driver/view/widgets/logger_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:draggable_bottom_sheet/draggable_bottom_sheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_countdown_timer/current_remaining_time.dart';
-import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:timeline_tile/timeline_tile.dart';
 
 import '../../../constants/enum.dart';
 import '../../../widgets/SpritePainter.dart';
+import '../../../widgets/directions_repository.dart';
 import '../../../widgets/side_navigation.dart';
 import '../../../widgets/toast.dart';
 import 'DriverAcceptTrip.dart';
-import 'driver_pickup.dart';
 
 class DriverHomeInit extends StatefulWidget {
   static String id = "DriverHomeInit";
@@ -46,23 +40,29 @@ class _HomeActivityState extends State<DriverHomeInit>
   late AnimationController _controller;
   late LocationData userLocation;
   bool isLoading = true;
+  bool isOnline = false;
   TripProvider tripProvider = TripProvider();
   TextEditingController destination = TextEditingController();
   RegistrationProvider registrationProvider = RegistrationProvider();
   LocationProvider _locationProvider = LocationProvider();
   SharedPreferenceProvider _sp = SharedPreferenceProvider();
   DriverProvider driverProvider = DriverProvider();
-  MapController _mapController = MapController();
   String loadingText = "Updating Location";
   int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 30;
   bool isDriver = false;
   String name = "userName";
   bool hasRequest = false;
+  var profilePhoto;
+  double size = 50;
+  Completer<GoogleMapController> _mapController = Completer();
+  Marker? originMarker, destinationMarker;
+  Directions? destinationInformation;
+  GoogleMapsProvider googleMapsProvider = GoogleMapsProvider();
 
   @override
   void initState() {
     destination.text = "Select Destination";
-    _controller = new AnimationController(
+    _controller = AnimationController(
       vsync: this,
     );
     getUserData();
@@ -86,17 +86,25 @@ class _HomeActivityState extends State<DriverHomeInit>
   }
 
   UpdateDriverLocation() async {
-    // await registrationProvider.LoginUser(
-    //     number: "0954512435", password: "Passwo rd123!");
     setState(() => isLoading = true);
+    var sp = SharedPreferenceProvider();
+    var photo = await sp.getStringValue(getEnumValue(UserDetails.userPhoto));
+    setState(() => profilePhoto = photo);
     userLocation = (await _locationProvider.getUserLocation(context))!;
+
+    //set maps
+    await googleMapsProvider.addUserLocationData(
+      userLocation: userLocation,
+      controllerData: _mapController,
+    );
+
     var response = await registrationProvider.getUserId();
     UserDataModel userDataModel = UserDataModel.fromJson(
-      response.data,
+      response.data!,
     );
     var updateResponse = await driverProvider.updateDriverLocation(
       jsonBody: {
-        "driver": userDataModel.me?.driverSet[0].id,
+        "driver": userDataModel.me?.driverSet?[0].id,
         "latitude": userLocation.latitude,
         "longitude": userLocation.longitude,
       },
@@ -104,22 +112,8 @@ class _HomeActivityState extends State<DriverHomeInit>
     AddDriverLocationModel locationModel = AddDriverLocationModel.fromJson(
       updateResponse.data,
     );
-    if (locationModel.addDriverLocation?.response == 200) {
-      toastMessage(context: context, message: "Location Updated");
-      _gotoLocation(
-        userLocation.latitude ?? 0,
-        userLocation.longitude ?? 0,
-      );
-      setState(() {
-        loadingText = "Waiting for Trip Request";
-      });
-      await customerSearch();
-    }
+    if (locationModel.addDriverLocation?.response == 200) {}
     setState(() => isLoading = false);
-  }
-
-  void _gotoLocation(double lat, double long) {
-    _mapController.move(LatLng(lat, long), _mapController.zoom);
   }
 
   Future<void> customerSearch() async {
@@ -129,12 +123,17 @@ class _HomeActivityState extends State<DriverHomeInit>
       var data = await tripProvider.allTripRequests(jsonBody: {"": ""});
       if (data.allRequestTrip!.length > 0) {
         hasRequest = true;
-        Navigator.push(
+        await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DriverAcceptTrip(model: data),
+            builder: (context) => DriverAcceptTrip(
+              model: data,
+              profilePhoto: profilePhoto,
+            ),
           ),
         );
+        toastMessage(context: context, message: "Loading More");
+        hasRequest = false;
       }
       loggerInfo(message: "PRINTING $num");
       num++;
@@ -144,8 +143,8 @@ class _HomeActivityState extends State<DriverHomeInit>
 
   @override
   void dispose() {
-    _controller.dispose();
-    tripProvider.dispose();
+    // _controller.dispose();
+    // tripProvider.dispose();
     setState(() => hasRequest = true);
     super.dispose();
   }
@@ -170,31 +169,69 @@ class _HomeActivityState extends State<DriverHomeInit>
             children: [
               Text(name, style: kTextStyleHeader2),
               SizedBox(width: 8),
-              Icon(FontAwesome.user_circle, color: Colors.grey[800]),
+              ClipRRect(
+                borderRadius: kBorderRadiusCircularPro,
+                child: CachedNetworkImage(
+                  height: 35.0,
+                  width: 35.0,
+                  imageUrl: profilePhoto,
+                  fit: BoxFit.cover,
+                  errorWidget: (context, url, error) => Icon(
+                    FontAwesome.user_circle,
+                    color: Colors.grey[800],
+                    size: 35,
+                  ),
+                ),
+              ),
               SizedBox(width: 10),
             ],
           ),
         ],
       ),
       body: BottomDragInit(),
-      drawer: buildDrawer(context: context, isDriver: isDriver),
+      drawer: buildDrawer(
+        context: context,
+        isDriver: isDriver,
+        profilePhoto: profilePhoto,
+        userName: name,
+      ),
     );
   }
 
   Widget BottomDragInit() {
     return DraggableBottomSheet(
-      backgroundWidget: buildContainer(),
-      previewChild: dragContainer(),
-      expandedChild: dragContainer(),
+      backgroundWidget: mapBody(),
+      previewChild: isOnline ? offlineButton() : onlineButton(),
+      expandedChild: isOnline ? offlineButton() : onlineButton(),
       minExtent: 200,
       blurBackground: false,
       //maxExtent: MediaQuery.of(context).size.height * 0.8,
     );
   }
 
-  Container buildContainer() {
-    return Container(
-      child: mapBody(),
+  Widget mapBody() {
+    return GoogleMap(
+      mapType: MapType.normal,
+      initialCameraPosition: googleMapsProvider.defaultDestination,
+      zoomControlsEnabled: false,
+      onMapCreated: (GoogleMapController controller) {
+        _mapController.complete(controller);
+      },
+      markers: {
+        if (originMarker != null) originMarker!,
+        if (destinationMarker != null) destinationMarker!
+      },
+      polylines: {
+        if (destinationInformation != null)
+          Polyline(
+            polylineId: const PolylineId('overview_polyline'),
+            color: Colors.orange,
+            width: 8,
+            points: destinationInformation!.polylinePoints
+                .map((e) => LatLng(e.latitude, e.longitude))
+                .toList(),
+          ),
+      },
     );
   }
 
@@ -234,71 +271,47 @@ class _HomeActivityState extends State<DriverHomeInit>
     );
   }
 
-  Widget mapBody() {
-    return SizedBox(
-      child: FlutterMap(
-        mapController: _mapController,
-        options: MapOptions(
-          center: isLoading
-              ? LatLng(-15.3868807, 28.3478416)
-              : LatLng(
-                  double.parse(userLocation.latitude.toString()),
-                  double.parse(userLocation.longitude.toString()),
-                ),
-          zoom: 15.0,
-        ),
-        layers: [
-          TileLayerOptions(
-            urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            subdomains: ['a', 'b', 'c'],
-            attributionBuilder: (_) {
-              return Text("© OpenStreetMap contributors");
-            },
-          ),
-          MarkerLayerOptions(
-            markers: [
-              mapMarkers(
-                latitude: isLoading
-                    ? -15.3868807
-                    : double.parse(
-                        userLocation.latitude.toString(),
-                      ),
-                longitude: isLoading
-                    ? 28.3478416
-                    : double.parse(
-                        userLocation.longitude.toString(),
-                      ),
-                title: 'Driver',
-              ),
-            ],
-          ),
+  Widget onlineButton() {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          gradientButton(
+              title: "Go Online",
+              function: () async {
+                toastMessage(context: context, message: "Updating Location");
+                setState(() {
+                  loadingText = "Waiting for Trip Request";
+                  isOnline = true;
+                  size = 200;
+                });
+                await customerSearch();
+              }),
         ],
       ),
     );
   }
 
-  mapMarkers({
-    required double latitude,
-    required double longitude,
-    required String title,
-  }) {
-    return Marker(
-      width: 300.0,
-      height: 200.0,
-      point: LatLng(latitude, longitude),
-      builder: (ctx) => Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.asset("assets/images/Pickup.png", height: 50),
-          ],
-        ),
+  Widget offlineButton() {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          gradientButton(
+              title: "Go Offline",
+              function: () async {
+                toastMessage(context: context, message: "Going Offline");
+                setState(() {
+                  loadingText = "Waiting for Trip Request";
+                  isOnline = false;
+                  size = 200;
+                });
+                await customerSearch();
+              }),
+        ],
       ),
     );
-  }
-
-  callme() async {
-    await Future.delayed(Duration(seconds: 1));
-    return "success";
   }
 }

@@ -14,7 +14,7 @@ import '../../../widgets/PopUpDialogs.dart';
 import '../../../widgets/gradientButton.dart';
 import '../../../widgets/signOptionsPro.dart';
 import '../../../widgets/toast.dart';
-import 'accountDetails.dart';
+import 'BusinessRegistration.dart';
 import 'driverOTP.dart';
 
 class DriverSignUp extends StatefulWidget {
@@ -212,6 +212,7 @@ class _HomeActivityState extends State<DriverSignUp> {
     );
     UserModel model = UserModel(
       id: "5",
+      photo: "",
       email: _emailController.text,
       phoneNumber: _phoneNumber.text,
       firstName: _fullNameController.text.split(" ").length > 1
@@ -229,7 +230,6 @@ class _HomeActivityState extends State<DriverSignUp> {
       var response = responseBody!["createAccount"];
       if (response!["response"] == 200) {
         //save to sp
-
         toastMessage(context: context, message: "Registration Successful");
         Navigator.push(
           context,

@@ -1,9 +1,11 @@
+import 'package:bookie_driver/provider/RegistrationProvider.dart';
 import 'package:bookie_driver/view/constants/constants.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
+import '../../../../model/core/UserDataModel.dart';
 import '../../../../provider/shared_prefrence_provider.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 
@@ -12,35 +14,34 @@ import '../../../widgets/side_navigation.dart';
 import '../../../widgets/tripData.dart';
 
 class DriverDashboard extends StatefulWidget {
-  static String id = "DriverDashboard";
-  const DriverDashboard({Key? key}) : super(key: key);
+  String profilePhoto;
+  DriverDashboard({Key? key, required this.profilePhoto}) : super(key: key);
 
   @override
-  _DriverDashboardState createState() => _DriverDashboardState();
+  _DriverDashboardState createState() => _DriverDashboardState(profilePhoto);
 }
 
 class _DriverDashboardState extends State<DriverDashboard> {
   int _currentIndex = 0;
-  bool isActive_1 = true, isActive_3 = false, isActive_2 = false;
+  String profilePhoto;
+  bool isActive_1 = true,
+      isActive_3 = false,
+      isActive_2 = false,
+      isLoading = true;
   SharedPreferenceProvider _sp = SharedPreferenceProvider();
   bool isDriver = false;
   var widgetListBottom = [];
   var widgetListTop = [];
+  var registrationProvider = RegistrationProvider();
+  UserDataModel? userDataModel;
+  _DriverDashboardState(this.profilePhoto);
 
   @override
   void initState() {
     super.initState();
-    widgetListBottom = [
-      tripsTodayBody(),
-      walletSection(),
-      ActivitySection(),
-    ];
-    widgetListTop = [
-      tripSummary(),
-      moneySection(),
-      userDetailsSection(),
-    ];
+
     checkTripType();
+    getData();
   }
 
   resetActiveStatus() {
@@ -52,6 +53,26 @@ class _DriverDashboardState extends State<DriverDashboard> {
   Future<void> checkTripType() async {
     var isDriverTemp = await _sp.checkIfDriver("AccountType");
     setState(() => isDriverTemp ? isDriver = true : false);
+  }
+
+  getData() async {
+    var data = await registrationProvider.getUserId();
+    setState(() {
+      userDataModel = UserDataModel.fromJson(
+        data.data!,
+      );
+      isLoading = false;
+    });
+    widgetListBottom = [
+      tripsTodayBody(),
+      walletSection(),
+      ActivitySection(),
+    ];
+    widgetListTop = [
+      tripSummary(),
+      moneySection(),
+      userDetailsSection(),
+    ];
   }
 
   @override
@@ -66,9 +87,10 @@ class _DriverDashboardState extends State<DriverDashboard> {
         ),
       ),
       body: SafeArea(
-        child: buildContainer(),
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : buildContainer(),
       ),
-      drawer: buildDrawer(context: context, isDriver: isDriver),
       bottomNavigationBar: offlineButton(),
     );
   }
@@ -82,7 +104,6 @@ class _DriverDashboardState extends State<DriverDashboard> {
           tabsSectionPro(),
           SizedBox(height: 15),
           tabsSection(),
-          //ActivitySection()
         ],
       ),
     );
@@ -295,7 +316,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Jane Doe James",
+                      "${userDataModel?.me?.firstName} ${userDataModel?.me?.lastName}",
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -305,15 +326,23 @@ class _DriverDashboardState extends State<DriverDashboard> {
                     userDetail(key: "Department", value: "WPHO Driver"),
                     userDetail(key: "Joined", value: "Sep 2018"),
                     userDetail(
-                        key: "Experience and Skills", value: "4 Years, World"),
+                        key: "Experience and Skills",
+                        value:
+                            "${userDataModel?.me?.driverSet?.first.skills?.first.name}"),
                   ],
                 ),
               ),
               Expanded(
                 child: CachedNetworkImage(
-                  imageUrl:
-                      "https://images.unsplash.com/photo-1553272725-086100aecf5e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDF8MHxlZGl0b3JpYWwtZmVlZHw2fHx8ZW58MHx8fHw%3D&auto=format&fit=crop&w=500&q=60",
+                  imageUrl: userDataModel!.me!.profilepictureSet!.isNotEmpty
+                      ? "${userDataModel!.me!.profilepictureSet!.first.image}"
+                      : " ",
                   fit: BoxFit.cover,
+                  errorWidget: (context, url, error) => Icon(
+                    FontAwesome.user_circle,
+                    color: Colors.grey[800],
+                    size: 50,
+                  ),
                 ),
               )
             ],

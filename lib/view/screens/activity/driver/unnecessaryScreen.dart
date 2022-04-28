@@ -14,7 +14,6 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
 import '../../../../model/core/TripListModel.dart';
@@ -32,38 +31,41 @@ import '../../../widgets/dragContainerBody.dart';
 import '../../../widgets/gradientContainer.dart';
 import '../../../widgets/logger_widget.dart';
 import '../../../widgets/side_navigation.dart';
+import 'DriverHomeInit.dart';
 import 'driver_pickup.dart';
+import 'onTrip.dart';
 
-class DriverAcceptTrip extends StatefulWidget {
-  static String id = "DriverHome";
-  TripListModel model;
+class UnnecessaryScreen extends StatefulWidget {
+  static String id = "UnnecessaryScreen";
+  AllRequestTrip model;
+  String acceptTripId;
   String profilePhoto;
-  DriverAcceptTrip({
-    Key? key,
-    required this.model,
-    required this.profilePhoto,
-  }) : super(key: key);
+  UnnecessaryScreen(
+      {Key? key,
+      required this.model,
+      required this.acceptTripId,
+      required this.profilePhoto})
+      : super(key: key);
 
   @override
-  _HomeActivityState createState() => _HomeActivityState(model, profilePhoto);
+  _HomeActivityState createState() =>
+      _HomeActivityState(model, acceptTripId, profilePhoto);
 }
 
-class _HomeActivityState extends State<DriverAcceptTrip> {
-  TripListModel model;
-  String profilePhoto;
+class _HomeActivityState extends State<UnnecessaryScreen> {
+  AllRequestTrip model;
   TextEditingController destination = TextEditingController();
   SharedPreferenceProvider _sp = SharedPreferenceProvider();
   LocationProvider locationProvider = LocationProvider();
+  int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 30;
   bool isDriver = false;
   var total;
-  int tripCounter = 0, timerCounter = 0;
+  String profilePhoto;
   String name = "userName";
   AllRequestTrip? allRequestTrip;
-  _HomeActivityState(this.model, this.profilePhoto);
-  final StopWatchTimer _stopWatchTimer = StopWatchTimer(
-    mode: StopWatchMode.countDown,
-    presetMillisecond: StopWatchTimer.getMilliSecFromSecond(30),
-  ); // Create instance.
+  String acceptTripId;
+  _HomeActivityState(this.model, this.acceptTripId, this.profilePhoto);
+
   Completer<GoogleMapController> _mapController = Completer();
   Marker? originMarker, destinationMarker;
   Directions? destinationInformation;
@@ -75,13 +77,6 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
     destination.text = "Select Destination";
     checkTripType();
     getUserData();
-    _stopWatchTimer.onExecute.add(StopWatchExecute.start);
-  }
-
-  @override
-  void dispose() async {
-    super.dispose();
-    _stopWatchTimer.dispose();
   }
 
   getUserData() async {
@@ -103,10 +98,10 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
     var userLocation = LocationData.fromMap(
       {
         'latitude': double.parse(
-          model.allRequestTrip![tripCounter].pickupLocation!.latitude,
+          model.pickupLocation!.latitude,
         ),
         'longitude': double.parse(
-          model.allRequestTrip![tripCounter].pickupLocation!.longitude,
+          model.pickupLocation!.longitude,
         ),
       },
     );
@@ -119,10 +114,10 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
     //set destination
     LatLng location = LatLng(
       double.parse(
-        model.allRequestTrip![tripCounter].endLocation!.latitude,
+        model.endLocation!.latitude,
       ),
       double.parse(
-        model.allRequestTrip![tripCounter].endLocation!.longitude,
+        model.endLocation!.longitude,
       ),
     );
     var destinationResult = await googleMapsProvider.addMarker(
@@ -133,7 +128,7 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
       pos: location,
       originMarker: originMarker!,
     );
-    var destinationDistance = tripData!.totalDistance.split(" ").first;
+    var destinationDistance = tripData!.totalDistance.split(" ")[0];
     setState(() {
       //totalTime = "3";
       destinationMarker = destinationResult;
@@ -146,6 +141,23 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
       controllerData: _mapController,
       directionsInformation: destinationInformation,
     );
+  }
+
+  Future<void> completeTrip() async {
+    var tripProvider = TripProvider();
+    var popUpDialog = PopUpDialogs(context: context);
+
+    popUpDialog.showLoadingAnimation(context: context);
+    var data = await tripProvider.updateTripData(
+      jsonBody: {
+        "id": model.id,
+        "status": "COMPLETE",
+      },
+    );
+    popUpDialog.closeDialog();
+    if (data.updateRequestTrip?.response == "200") {
+      Navigator.popAndPushNamed(context, DriverHomeInit.id);
+    }
   }
 
   @override
@@ -193,7 +205,7 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
       backgroundWidget: mapBody(),
       previewChild: dragContainer(),
       expandedChild: dragContainer(),
-      minExtent: 380,
+      minExtent: 330,
       blurBackground: false,
       //maxExtent: MediaQuery.of(context).size.height * 0.8,
     );
@@ -215,8 +227,8 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
         if (destinationInformation != null)
           Polyline(
             polylineId: const PolylineId('overview_polyline'),
-            color: Colors.orange,
-            width: 8,
+            color: kAccent,
+            width: 5,
             points: destinationInformation!.polylinePoints
                 .map((e) => LatLng(e.latitude, e.longitude))
                 .toList(),
@@ -238,7 +250,7 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
   }
 
   tripDetails() {
-    var dataValue = model.allRequestTrip![tripCounter];
+    var dataValue = model;
     allRequestTrip = dataValue;
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -248,8 +260,8 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -347,33 +359,7 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 15),
-                dataValue.type.toString() == "BusinessToBusiness"
-                    ? dataValue.businessrequesttripSet!.isNotEmpty
-                        ? Text(
-                            "Trip Description:\n${dataValue.businessrequesttripSet?.first.tripDescription}",
-                            textAlign: TextAlign.left,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          )
-                        : const Text("NO TRIP DESCRIPTION")
-                    : const SizedBox(height: 0),
-                const SizedBox(height: 15),
-                dataValue.type.toString() == "BusinessToBusiness"
-                    ? dataValue.businessrequesttripSet!.isNotEmpty
-                        ? Text(
-                            "Required Skills:\n${dataValue.businessrequesttripSet?.join(",")}",
-                            textAlign: TextAlign.left,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          )
-                        : const Text("NO REQUIRED SKILLS")
-                    : const SizedBox(height: 0),
-                const SizedBox(height: 15),
+                SizedBox(height: 15),
                 Row(
                   children: [
                     dataValue.type.toString() == "BusinessToBusiness"
@@ -442,8 +428,41 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           ElevatedButton(
-            onPressed: () async {
-              await rejectTrip(context);
+            onPressed: () {
+              Widget cancelButton = TextButton(
+                child: Text("Cancel"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              );
+              Widget continueButton = TextButton(
+                child: Text("Continue"),
+                onPressed: () {
+                  Navigator.pop(context);
+                  completeTrip();
+                },
+              );
+              AlertDialog alert = AlertDialog(
+                title: Text(
+                  "Trip Completion",
+                  style: TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+                content: Text(
+                  "Are you sure you want to end this trip?",
+                ),
+                actions: [
+                  cancelButton,
+                  continueButton,
+                ],
+              );
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return alert;
+                },
+              );
             },
             style: ButtonStyle(
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -458,74 +477,39 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
                 horizontal: 30,
                 vertical: 15,
               ),
-              child: Text("Reject"),
+              child: Text("Stop"),
             ),
-          ),
-          StreamBuilder<int>(
-            stream: _stopWatchTimer.rawTime,
-            initialData: 0,
-            builder: (context, snap) {
-              final value = snap.data;
-              final displayTime = StopWatchTimer.getDisplayTime(
-                value!,
-                milliSecond: false,
-                hours: false,
-                minute: false,
-              );
-              timerCounter++;
-              if (timerCounter > 50) {
-                if (displayTime == "00") {
-                  _stopWatchTimer.onExecute.add(StopWatchExecute.stop);
-                  //rejectTrip(context);
-                }
-              }
-              return Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    width: 1,
-                    color: Colors.red,
-                  ),
-                  borderRadius: BorderRadius.all(Radius.circular(365)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(displayTime),
-                ),
-              );
-            },
           ),
           ElevatedButton(
             onPressed: () async {
               PopUpDialogs dialogs = PopUpDialogs(context: context);
               dialogs.showLoadingAnimation(context: context);
-              RegistrationProvider registation = RegistrationProvider();
-              var responseVal = await registation.getUserId();
-              UserDataModel userDataModel = UserDataModel.fromJson(
-                responseVal.data!,
-              );
               TripProvider provider = TripProvider();
-              var response = await provider.driverAcceptTrip(
-                requestTripId: model.allRequestTrip?[tripCounter].id,
-                driverId: userDataModel.me?.driverSet?.first.id,
+              // var response = await provider.updateTripData(jsonBody: {
+              //   "id": "${model.allRequestTrip?[0].id}",
+              //   "status": "ON TRIP",
+              // });
+              var dataValue = model;
+              var tripResponse = await provider.addTripData(
+                acceptId: acceptTripId,
+                endLocationName: dataValue.endLocation?.name,
+                endLocationLatituide: dataValue.endLocation?.latitude,
+                endLocationLongitude: dataValue.endLocation?.longitude,
+                startLocationName: dataValue.pickupLocation?.name,
+                startLocationLatituide: dataValue.pickupLocation?.latitude,
+                startLocationLongitude: dataValue.pickupLocation?.longitude,
               );
-
-              if (response.addAcceptTrip?.response == "200") {
-                dialogs.closeDialog();
+              dialogs.closeDialog();
+              if (tripResponse.addTrip?.response == 200) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DriverPickUp(
+                    builder: (context) => OnTrip(
+                      model: model,
                       profilePhoto: profilePhoto,
-                      model: model.allRequestTrip![tripCounter],
-                      acceptTripId:
-                          response.addAcceptTrip?.acceptTrip?.id ?? "",
                     ),
                   ),
                 );
-              } else {
-                dialogs.closeDialog();
-                toastMessage(
-                    context: context, message: response.addAcceptTrip?.message);
               }
             },
             style: ButtonStyle(
@@ -536,40 +520,16 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
               ),
               backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
+            child: const Padding(
+              padding: EdgeInsets.symmetric(
                 horizontal: 30,
                 vertical: 15,
               ),
-              child: Text("Accept"),
+              child: Text("Start Trip"),
             ),
           ),
         ],
       ),
     );
-  }
-
-  Future<void> rejectTrip(BuildContext context) async {
-    _stopWatchTimer.onExecute.add(StopWatchExecute.reset);
-    _stopWatchTimer.onExecute.add(StopWatchExecute.start);
-    var counter = tripCounter + 1;
-    if (counter == model.allRequestTrip!.length) {
-      toastMessage(
-        context: context,
-        message: "No More Available Trips, Scanning for more",
-      );
-      Navigator.pop(context);
-    } else {
-      setState(() {
-        tripCounter = tripCounter + 1;
-      });
-      var dialog = PopUpDialogs(context: context);
-      dialog.showLoadingAnimation(
-        context: context,
-        message: "Loading More Trips",
-      );
-      await setMap();
-      dialog.closeDialog();
-    }
   }
 }

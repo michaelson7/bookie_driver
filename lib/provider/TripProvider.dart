@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:graphql/src/core/query_result.dart';
+import '../model/core/AcceptTripModel.dart';
 import '../model/core/AddTripModel.dart';
+import '../model/core/AddTripResponse.dart';
 import '../model/core/TripListModel.dart';
 import '../model/core/TripUpdateModel.dart';
 import '../model/core/UserTripData.dart';
@@ -32,23 +34,7 @@ class TripProvider extends ChangeNotifier {
       mutation: allRequestTrip,
     );
     if (!data.hasException) {
-      response = TripListModel.fromJson(data.data);
-      for (var data in response.allRequestTrip!) {
-        var location = await geoLocatorProvider.getUserLocation(
-          latitude: double.parse(data.pickupLocation?.latitude ?? ""),
-          longitude: double.parse(data.pickupLocation?.longitude ?? ""),
-        );
-        data.pickupLocation?.LocationName =
-            "${location.street}, ${location.subLocality}";
-
-        location = await geoLocatorProvider.getUserLocation(
-          latitude: double.parse(data.endLocation?.latitude ?? ""),
-          longitude: double.parse(data.endLocation?.longitude ?? ""),
-        );
-
-        data.endLocation?.LocationName =
-            "${location.street}, ${location.subLocality}";
-      }
+      response = TripListModel.fromJson(data.data!);
     }
     return response;
   }
@@ -77,6 +63,52 @@ class TripProvider extends ChangeNotifier {
     );
     if (!data.hasException) {
       response = TripUpdateModel.fromJson(data.data);
+    }
+    return response;
+  }
+
+  Future<AcceptTripModel> driverAcceptTrip({
+    required driverId,
+    required requestTripId,
+  }) async {
+    AcceptTripModel response = AcceptTripModel();
+    var data = await MutationRequest(
+      jsonBody: {
+        "requestTripId": requestTripId,
+        "driverId": driverId,
+      },
+      mutation: addAcceptTrip,
+    );
+    if (!data.hasException) {
+      response = AcceptTripModel.fromJson(data.data);
+    }
+    return response;
+  }
+
+  Future<AddTripResponse> addTripData({
+    required acceptId,
+    required endLocationName,
+    required endLocationLatituide,
+    required endLocationLongitude,
+    required startLocationName,
+    required startLocationLatituide,
+    required startLocationLongitude,
+  }) async {
+    var response = AddTripResponse();
+    var data = await MutationRequest(
+      jsonBody: {
+        "acceptId": acceptId,
+        "endLocationName": endLocationName,
+        "endLocationLatituide": endLocationLatituide,
+        "endLocationLongitude": endLocationLongitude,
+        "startLocationName": startLocationName,
+        "startLocationLatituide": startLocationLatituide,
+        "startLocationLongitude": startLocationLongitude,
+      },
+      mutation: addTrip,
+    );
+    if (!data.hasException) {
+      response = AddTripResponse.fromJson(data.data);
     }
     return response;
   }

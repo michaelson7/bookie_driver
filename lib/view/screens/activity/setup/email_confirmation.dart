@@ -4,9 +4,21 @@ import 'package:flutter/material.dart';
 import '../../../constants/constants.dart';
 import 'login_activity.dart';
 
-class EmailConfirmation extends StatelessWidget {
+class EmailConfirmation extends StatefulWidget {
   static String id = "EmailConfirmation";
-  const EmailConfirmation({Key? key}) : super(key: key);
+  String email;
+  EmailConfirmation({
+    Key? key,
+    required this.email,
+  }) : super(key: key);
+
+  @override
+  State<EmailConfirmation> createState() => _EmailConfirmationState(email);
+}
+
+class _EmailConfirmationState extends State<EmailConfirmation> {
+  String email;
+  _EmailConfirmationState(this.email);
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +59,7 @@ class EmailConfirmation extends StatelessWidget {
         ),
         SizedBox(height: 10),
         Text(
-          "We sent an OTP with a confirmation link to Pastoriasikalinda3@gmail.com",
+          "We sent an OTP with a confirmation link to ${email}",
           textAlign: TextAlign.center,
         ),
         SizedBox(height: 100),
@@ -55,7 +67,12 @@ class EmailConfirmation extends StatelessWidget {
           width: 300,
           child: InkWell(
             onTap: () {
-              Navigator.popAndPushNamed(context, PasswordReset.id);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PasswordReset(email: email),
+                ),
+              );
             },
             child: Container(
               decoration: BoxDecoration(

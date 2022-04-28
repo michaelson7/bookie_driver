@@ -6,18 +6,30 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/otp_field_style.dart';
 import 'package:otp_text_field/style.dart';
+import '../../../../provider/RegistrationProvider.dart';
+import '../../../widgets/PopUpDialogs.dart';
+import '../../../widgets/toast.dart';
 import 'email_confirmation.dart';
 import 'forgot_password.dart';
+import 'login_activity.dart';
 
 class PasswordReset extends StatefulWidget {
   static String id = "PasswordReset";
-  const PasswordReset({Key? key}) : super(key: key);
+  String email;
+  PasswordReset({Key? key, required this.email}) : super(key: key);
 
   @override
-  _HomeActivityState createState() => _HomeActivityState();
+  _HomeActivityState createState() => _HomeActivityState(email);
 }
 
 class _HomeActivityState extends State<PasswordReset> {
+  String email;
+  TextEditingController newPasswordController = TextEditingController(),
+      confirmPasswordController = TextEditingController();
+  String otpValueController = "";
+  var _formKey = GlobalKey<FormState>();
+  _HomeActivityState(this.email);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,41 +96,48 @@ class _HomeActivityState extends State<PasswordReset> {
         //textFieldAlignment: MainAxisAlignment.spaceAround,
         fieldStyle: FieldStyle.box,
         onCompleted: (pin) {
-          print("Completed: " + pin);
+          otpValueController = pin;
         },
       ),
     );
   }
 
   passwordSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 20),
-        Text("ENTER NEW PASSWORD"),
-        SizedBox(height: 8),
-        Material(
-          borderRadius: kBorderRadiusCircularPro,
-          color: Colors.grey[200],
-          child: ListTile(
-            leading: Icon(FontAwesome.eye, color: Colors.black),
-            title: TextField(
-              obscureText: true,
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 20),
+          Text("ENTER NEW PASSWORD"),
+          SizedBox(height: 8),
+          Material(
+            borderRadius: kBorderRadiusCircularPro,
+            color: Colors.grey[200],
+            child: ListTile(
+              leading: Icon(FontAwesome.eye, color: Colors.black),
+              title: TextField(
+                controller: newPasswordController,
+                obscureText: true,
+              ),
             ),
           ),
-        ),
-        SizedBox(height: 20),
-        Text("ENTER NEW PASSWORD"),
-        SizedBox(height: 10),
-        Material(
-          borderRadius: kBorderRadiusCircularPro,
-          color: Colors.grey[200],
-          child: ListTile(
-            leading: Icon(FontAwesome.eye, color: Colors.black),
-            title: TextField(obscureText: true),
+          SizedBox(height: 20),
+          Text("ENTER NEW PASSWORD"),
+          SizedBox(height: 10),
+          Material(
+            borderRadius: kBorderRadiusCircularPro,
+            color: Colors.grey[200],
+            child: ListTile(
+              leading: Icon(FontAwesome.eye, color: Colors.black),
+              title: TextField(
+                obscureText: true,
+                controller: confirmPasswordController,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -161,8 +180,32 @@ class _HomeActivityState extends State<PasswordReset> {
 
   SubmitButton() {
     return InkWell(
-      onTap: () {
-        Navigator.popAndPushNamed(context, DriverHomeInit.id);
+      onTap: () async {
+        if (_formKey.currentState!.validate()) {
+          if (newPasswordController.text != confirmPasswordController.text) {
+            toastMessage(
+              context: context,
+              message: "New password does not match confirmed password",
+            );
+          } else {
+            var dialog = PopUpDialogs(context: context);
+            var provider = RegistrationProvider();
+            dialog.showLoadingAnimation(context: context);
+            //
+            var response = await provider.resetPasswords(
+              email: email,
+              otp: otpValueController,
+              password1: newPasswordController.text,
+              password2: confirmPasswordController.text,
+            );
+            dialog.closeDialog();
+            if (response.resetPassword?.response == 200) {
+              Navigator.popAndPushNamed(context, LoginActivity.id);
+            }
+          }
+        } else {
+          toastMessage(context: context, message: "Please Add Required Data");
+        }
       },
       child: Padding(
         padding: const EdgeInsets.all(15.0),

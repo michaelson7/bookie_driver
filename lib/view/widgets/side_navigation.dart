@@ -2,9 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 
+import '../../provider/shared_prefrence_provider.dart';
 import '../constants/constants.dart';
 import '../screens/activity/driver/DriverHomeInit.dart';
 import '../screens/activity/driver/driver_dashboard.dart';
+import '../screens/activity/driver/profileScreen.dart';
 import '../screens/activity/paymentSelection/payment_selection_activity.dart';
 import '../screens/activity/setup/login_activity.dart';
 import 'logger_widget.dart';
@@ -12,8 +14,9 @@ import 'logger_widget.dart';
 Drawer buildDrawer({
   required BuildContext context,
   required bool isDriver,
+  required profilePhoto,
+  required userName,
 }) {
-  loggerInfo(message: "IS DRIVER ${isDriver}");
   return Drawer(
     child: Container(
       decoration: BoxDecoration(
@@ -38,20 +41,24 @@ Drawer buildDrawer({
               child: Row(
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.all(Radius.elliptical(30, 30)),
+                    borderRadius: kBorderRadiusCircularPro,
                     child: CachedNetworkImage(
-                      height: 70.0,
-                      width: 70.0,
-                      imageUrl:
-                          "https://images.unsplash.com/photo-1553272725-086100aecf5e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDF8MHxlZGl0b3JpYWwtZmVlZHw2fHx8ZW58MHx8fHw%3D&auto=format&fit=crop&w=500&q=60",
+                      height: 35.0,
+                      width: 35.0,
+                      imageUrl: profilePhoto,
                       fit: BoxFit.cover,
+                      errorWidget: (context, url, error) => Icon(
+                        FontAwesome.user_circle,
+                        color: Colors.grey[800],
+                        size: 35,
+                      ),
                     ),
                   ),
                   SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Hi, User", style: kTextStyleHeader1),
+                      Text("Hi, $userName", style: kTextStyleHeader1),
                       Text(
                         "#Let's get you there",
                         style: TextStyle(
@@ -65,6 +72,20 @@ Drawer buildDrawer({
             ),
           ),
           menuButton(
+            title: "Dashboard",
+            icon: FontAwesome.dashboard,
+            function: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DriverDashboard(
+                    profilePhoto: profilePhoto,
+                  ),
+                ),
+              );
+            },
+          ),
+          menuButton(
             title: "Home",
             icon: Icons.home,
             function: () {
@@ -72,17 +93,10 @@ Drawer buildDrawer({
             },
           ),
           menuButton(
-            title: "Dashboard",
-            icon: FontAwesome.dashboard,
+            title: "Profile",
+            icon: FontAwesome.user,
             function: () {
-              Navigator.pushNamed(context, DriverDashboard.id);
-            },
-          ),
-          menuButton(
-            title: "Card and Payments",
-            icon: Icons.credit_card_rounded,
-            function: () {
-              Navigator.pushNamed(context, PaymentSelectionActivity.id);
+              Navigator.pushNamed(context, ProfileScreen.id);
             },
           ),
           menuButton(
@@ -101,11 +115,13 @@ Drawer buildDrawer({
             function: () {},
           ),
           menuButton(
-            title: "Logout",
-            icon: FontAwesome.sign_out,
-            function: () =>
-                Navigator.popAndPushNamed(context, LoginActivity.id),
-          ),
+              title: "Logout",
+              icon: FontAwesome.sign_out,
+              function: () async {
+                SharedPreferenceProvider provider = SharedPreferenceProvider();
+                await provider.logOut();
+                Navigator.popAndPushNamed(context, LoginActivity.id);
+              }),
           SizedBox(
             height: 100,
             child: Container(),

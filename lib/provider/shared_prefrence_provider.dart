@@ -8,17 +8,49 @@ import '../view/widgets/logger_widget.dart';
 class SharedPreferenceProvider {
   SharedPreferenceModel sharedPreferenceModel = SharedPreferenceModel();
 
+  Future<UserModel> getUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var number = getEnumValue(UserDetails.number);
+    var password = getEnumValue(UserDetails.password);
+    UserModel userModel = UserModel(
+      email: "email",
+      photo: "",
+      phoneNumber: prefs.getString(number) ?? "",
+      firstName: "firstName",
+      lastName: "lastName",
+      password: prefs.getString(password) ?? "",
+      id: "id",
+    );
+    return userModel;
+  }
+
   addUserDetails(UserModel userModel) async {
     try {
       var userName = getEnumValue(UserDetails.userName);
       var userEmail = getEnumValue(UserDetails.userEmail);
       var userId = getEnumValue(UserDetails.userId);
+      var number = getEnumValue(UserDetails.number);
+      var password = getEnumValue(UserDetails.password);
       var userAccount = getEnumValue(UserDetails.userAccount);
+      var userPhoto = getEnumValue(UserDetails.userPhoto);
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString(userName, userModel.firstName + " " + userModel.lastName);
       prefs.setString(userEmail, userModel.email);
+      prefs.setString(number, userModel.phoneNumber);
+      prefs.setString(password, userModel.password);
       prefs.setString(userId, userModel.id);
+      prefs.setString(userPhoto, userModel.photo);
+    } catch (e) {
+      loggerError(message: "Error on sharedPreferences: $e");
+    }
+  }
+
+  addOTPVerification() async {
+    try {
+      var data = getEnumValue(Register.hasAddedOTP);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString(data, "TRUE");
     } catch (e) {
       loggerError(message: "Error on sharedPreferences: $e");
     }
@@ -30,9 +62,27 @@ class SharedPreferenceProvider {
     return userVal;
   }
 
+  Future<bool> isRegistrationOTPValid() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var data = prefs.getString(getEnumValue(TripType.tripType));
+    if (data == getEnumValue(TripType.b2b)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<bool> isBusinessTrip() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var data = getEnumValue(Register.hasAddedOTP);
+    bool userVal = prefs.containsKey(data);
+    return userVal;
+  }
+
   logOut() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    await preferences.clear();
+    await preferences.remove("userName");
+//    await preferences.clear();
   }
 
   setString({required String key, required String value}) async {

@@ -4,8 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
+import '../../../../model/core/UserModel.dart';
+import '../../../../provider/RegistrationProvider.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/mutations.dart';
+import '../../../widgets/PopUpDialogs.dart';
+import '../../../widgets/gradientButton.dart';
 import '../../../widgets/logger_widget.dart';
 import '../../../widgets/signOptionsPro.dart';
 import '../../../widgets/toast.dart';
@@ -26,19 +30,21 @@ class _HomeActivityState extends State<RegistrationActivity> {
       _fullNameController = TextEditingController(),
       _passwordController = TextEditingController(),
       _phoneNumber = TextEditingController();
+  bool _passwordVisible = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/images/shortBackground.png"),
-                alignment: Alignment.topCenter,
-                fit: BoxFit.fitWidth,
+          SizedBox(
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/Group 10.png"),
+                  alignment: Alignment.topCenter,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -57,7 +63,7 @@ class _HomeActivityState extends State<RegistrationActivity> {
           children: [
             loginBody(),
             SizedBox(height: 90),
-            socialSignIn(),
+            // socialSignIn(),
             registrationBody(),
           ],
         ),
@@ -69,7 +75,10 @@ class _HomeActivityState extends State<RegistrationActivity> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image.asset("assets/images/userHead.png", height: 120.0),
+        Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: Image.asset("assets/images/logo.png", height: 80.0),
+        ),
         Form(
           key: _formKey,
           child: Column(
@@ -107,7 +116,12 @@ class _HomeActivityState extends State<RegistrationActivity> {
         SizedBox(height: 15),
         SizedBox(
           width: 300,
-          child: registrationButton(),
+          child: gradientButton(
+            function: () async {
+              await RegisterUser();
+            },
+            title: "Create",
+          ),
         ),
       ],
     );
@@ -210,10 +224,25 @@ class _HomeActivityState extends State<RegistrationActivity> {
               onChanged: (value) {
                 setState(() {});
               },
-              obscureText: obscureText,
-              decoration: new InputDecoration(
+              obscureText: obscureText ? !_passwordVisible : false,
+              decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: hintText,
+                suffixIcon: obscureText
+                    ? IconButton(
+                        icon: Icon(
+                          _passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Theme.of(context).primaryColorDark,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _passwordVisible = !_passwordVisible;
+                          });
+                        },
+                      )
+                    : Text(""),
               ),
             ),
           )
@@ -246,6 +275,7 @@ class _HomeActivityState extends State<RegistrationActivity> {
               DriverOTP(
                 phoneNumber: _phoneNumber.text,
                 password: _passwordController.text,
+                isDriver: true,
               ).idPro,
             );
           } else {
@@ -261,15 +291,15 @@ class _HomeActivityState extends State<RegistrationActivity> {
       },
       mutation: createAccount,
       jsonBody: {
-        "email": _emailController.text,
-        "phoneNumber": _phoneNumber.text,
+        "email": _emailController.text.trim(),
+        "phoneNumber": _phoneNumber.text.trim(),
         "firstName": _fullNameController.text.split(" ").length > 1
             ? _fullNameController.text.split(" ")[0]
             : "",
         "lastName": _fullNameController.text.split(" ").length > 1
             ? _fullNameController.text.split(" ")[1]
             : "",
-        "password": _passwordController.text,
+        "password": _passwordController.text.trim(),
       },
       formKey: _formKey,
       context: context,
@@ -296,5 +326,57 @@ class _HomeActivityState extends State<RegistrationActivity> {
         ),
       ),
     );
+  }
+
+  Future<void> RegisterUser() async {
+    RegistrationProvider _registrationProvider = RegistrationProvider();
+    PopUpDialogs popUpDialogs = PopUpDialogs(context: context);
+    popUpDialogs.showLoadingAnimation(
+      context: context,
+      message: "Processing",
+    );
+    UserModel model = UserModel(
+      id: "5",
+      photo: "",
+      email: _emailController.text.trim(),
+      phoneNumber: _phoneNumber.text.trim(),
+      firstName: _fullNameController.text.split(" ").length > 1
+          ? _fullNameController.text.split(" ")[0]
+          : "",
+      lastName: _fullNameController.text.split(" ").length > 1
+          ? _fullNameController.text.split(" ")[1]
+          : "",
+      password: _passwordController.text.trim(),
+    );
+    var data = await _registrationProvider.RegisterUser(model: model);
+    popUpDialogs.closeDialog();
+    if (!data.hasException) {
+      var responseBody = data.data;
+      var response = responseBody!["createAccount"];
+      if (response!["response"] == 200) {
+        //save to sp
+        toastMessage(context: context, message: "Registration Successful");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DriverOTP(
+              phoneNumber: _phoneNumber.text,
+              password: _passwordController.text,
+              isDriver: true,
+            ),
+          ),
+        );
+      } else {
+        toastMessage(
+          context: context,
+          message: "Error, ${response["message"]}",
+        );
+      }
+    } else {
+      toastMessage(
+        context: context,
+        message: "Error, ${data.exception.toString()}",
+      );
+    }
   }
 }

@@ -1,46 +1,65 @@
+import 'dart:async';
+
 import 'package:bookie_driver/model/core/TripListModel.dart';
+import 'package:bookie_driver/provider/location_provider.dart';
 import 'package:bookie_driver/provider/shared_prefrence_provider.dart';
 import 'package:bookie_driver/view/constants/constants.dart';
-import 'package:bookie_driver/view/screens/activity/driver/driver_dashboard.dart';
-import 'package:bookie_driver/view/screens/activity/setup/login_activity.dart';
+import 'package:bookie_driver/view/screens/activity/driver/unnecessaryScreen.dart';
 import 'package:bookie_driver/view/widgets/timeline.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:draggable_bottom_sheet/draggable_bottom_sheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_countdown_timer/current_remaining_time.dart';
-import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'package:timeline_tile/timeline_tile.dart';
-
+import '../../../../provider/GoogleMapProvider.dart';
 import '../../../../provider/TripProvider.dart';
 import '../../../constants/enum.dart';
 import '../../../widgets/PopUpDialogs.dart';
+import '../../../widgets/directions_repository.dart';
+import '../../../widgets/dragContainerBody.dart';
 import '../../../widgets/gradientContainer.dart';
-import '../../../widgets/logger_widget.dart';
+import '../../../widgets/makeCall.dart';
 import '../../../widgets/side_navigation.dart';
 import 'CallScreen.dart';
 import 'onTrip.dart';
 
 class DriverPickUp extends StatefulWidget {
   static String id = "DriverPickUp";
-  TripListModel model;
-  DriverPickUp({Key? key, required this.model}) : super(key: key);
+  AllRequestTrip model;
+  String acceptTripId;
+  String profilePhoto;
+  DriverPickUp({
+    Key? key,
+    required this.model,
+    required this.acceptTripId,
+    required this.profilePhoto,
+  }) : super(key: key);
 
   @override
-  _HomeActivityState createState() => _HomeActivityState(model);
+  _HomeActivityState createState() =>
+      _HomeActivityState(model, acceptTripId, profilePhoto);
 }
 
 class _HomeActivityState extends State<DriverPickUp> {
-  TripListModel model;
+  AllRequestTrip model;
+  String acceptTripId;
   TextEditingController destination = TextEditingController();
   SharedPreferenceProvider _sp = SharedPreferenceProvider();
   int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 30;
   bool isDriver = false;
-  _HomeActivityState(this.model);
+  _HomeActivityState(this.model, this.acceptTripId, this.profilePhoto);
+  var userName = "";
+  var total;
+  String profilePhoto;
+  Completer<GoogleMapController> _mapController = Completer();
+  Marker? originMarker, destinationMarker;
+  Directions? destinationInformation;
+  GoogleMapsProvider googleMapsProvider = GoogleMapsProvider();
 
   @override
   void initState() {
@@ -55,7 +74,62 @@ class _HomeActivityState extends State<DriverPickUp> {
     );
     var isDriverTemp = await _sp.checkIfDriver("AccountType");
     setState(() => isDriverTemp ? isDriver = true : false);
-    loggerInfo(message: "Trip Type ${isDriver}");
+    getUserData();
+  }
+
+  getUserData() async {
+    userName = (await _sp.getStringValue(getEnumValue(UserDetails.userName)))!;
+    setMap();
+  }
+
+  Future<void> setMap() async {
+    //get user current location
+    var userLocation = LocationData.fromMap(
+      {
+        'latitude': double.parse(
+          model.pickupLocation!.latitude,
+        ),
+        'longitude': double.parse(
+          model.pickupLocation!.longitude,
+        ),
+      },
+    );
+    var pickUpLocationResult = await googleMapsProvider.addUserLocationData(
+      userLocation: userLocation,
+      controllerData: _mapController,
+    );
+    setState(() => originMarker = pickUpLocationResult);
+
+    //set destination
+    LatLng location = LatLng(
+      double.parse(
+        model.endLocation!.latitude,
+      ),
+      double.parse(
+        model.endLocation!.longitude,
+      ),
+    );
+    var destinationResult = await googleMapsProvider.addMarker(
+      pos: location,
+      isDestination: true,
+    );
+    var tripData = await googleMapsProvider.getDirections(
+      pos: location,
+      originMarker: originMarker!,
+    );
+    var destinationDistance = tripData!.totalDistance.split(" ")[0];
+    setState(() {
+      //totalTime = "3";
+      destinationMarker = destinationResult;
+      destinationInformation = tripData;
+      total = double.parse(destinationDistance) * 10;
+    });
+
+    //move to location
+    await googleMapsProvider.goToDestinations(
+      controllerData: _mapController,
+      directionsInformation: destinationInformation,
+    );
   }
 
   @override
@@ -68,25 +142,53 @@ class _HomeActivityState extends State<DriverPickUp> {
         actions: [
           Row(
             children: [
-              Text("UserName", style: kTextStyleHeader2),
+              Text(userName, style: kTextStyleHeader2),
               SizedBox(width: 8),
-              Icon(FontAwesome.user_circle, color: Colors.grey[800]),
+              ClipRRect(
+                borderRadius: kBorderRadiusCircularPro,
+                child: CachedNetworkImage(
+                  height: 35.0,
+                  width: 35.0,
+                  imageUrl: profilePhoto,
+                  fit: BoxFit.cover,
+                  errorWidget: (context, url, error) => Icon(
+                    FontAwesome.user_circle,
+                    color: Colors.grey[800],
+                    size: 35,
+                  ),
+                ),
+              ),
               SizedBox(width: 10),
             ],
           ),
         ],
       ),
-      body: buildContainer(),
-      drawer: buildDrawer(context: context, isDriver: isDriver),
+      body: BottomDragInit(),
+    );
+  }
+
+  Widget BottomDragInit() {
+    return DraggableBottomSheet(
+      backgroundWidget: mapBody(),
+      previewChild: dragContainer(),
+      expandedChild: dragContainer(),
+      minExtent: 380,
+      blurBackground: false,
+      //maxExtent: MediaQuery.of(context).size.height * 0.8,
     );
   }
 
   Container buildContainer() {
     return Container(
+      child: mapBody(),
+    );
+  }
+
+  Widget dragContainer() {
+    return dragContainerBody(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: mapBody()),
           tripDetails(),
           acceptanceOptions(context),
         ],
@@ -94,36 +196,8 @@ class _HomeActivityState extends State<DriverPickUp> {
     );
   }
 
-  Widget mapBody() {
-    return SizedBox(
-      child: FlutterMap(
-        options: MapOptions(
-          center: LatLng(-15.3868807, 28.3478416),
-          zoom: 13.0,
-        ),
-        layers: [
-          TileLayerOptions(
-            urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            subdomains: ['a', 'b', 'c'],
-            attributionBuilder: (_) {
-              return Text("© OpenStreetMap contributors");
-            },
-          ),
-          MarkerLayerOptions(
-            markers: [
-              mapMarkers(
-                latitude: -15.400358,
-                longitude: 28.323056,
-                title: 'Driver 3',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   tripDetails() {
+    var dataValue = model;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
@@ -145,12 +219,21 @@ class _HomeActivityState extends State<DriverPickUp> {
                           child: CachedNetworkImage(
                             height: 50.0,
                             width: 50.0,
-                            imageUrl:
-                                "https://images.unsplash.com/photo-1553272725-086100aecf5e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDF8MHxlZGl0b3JpYWwtZmVlZHw2fHx8ZW58MHx8fHw%3D&auto=format&fit=crop&w=500&q=60",
+                            imageUrl: dataValue
+                                    .user!.profilepictureSet!.isNotEmpty
+                                ? "${dataValue.user?.profilepictureSet!.first.image}"
+                                : " ",
                             fit: BoxFit.cover,
+                            errorWidget: (context, url, error) => Icon(
+                              FontAwesome.user_circle,
+                              color: Colors.grey[800],
+                              size: 50,
+                            ),
                           ),
                         ),
-                        Text("Jane Doe", style: TextStyle(color: Colors.white))
+                        Text(
+                            "${dataValue.user?.firstName} ${dataValue.user?.lastName}",
+                            style: TextStyle(color: Colors.white))
                       ],
                     ),
                     Expanded(
@@ -167,7 +250,7 @@ class _HomeActivityState extends State<DriverPickUp> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 50),
                       child: Text(
-                        "1h 02m",
+                        destinationInformation?.totalDuration ?? "",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -177,53 +260,60 @@ class _HomeActivityState extends State<DriverPickUp> {
                   ],
                 ),
                 SizedBox(height: 15),
+                Column(
+                  children: [
+                    TimelineTile(
+                      alignment: TimelineAlign.start,
+                      endChild: Container(
+                        color: Colors.amberAccent,
+                      ),
+                    ),
+                    Timeline(
+                      itemGap: 3,
+                      padding: EdgeInsets.zero,
+                      lineColor: Colors.yellow,
+                      indicatorColor: Colors.yellow,
+                      children: <Widget>[
+                        Container(
+                          child: Text(
+                            "${dataValue.pickupLocation?.name}",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                        Container(
+                          child: Text(
+                            "${dataValue.endLocation?.name}",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                      indicators: <Widget>[
+                        Icon(FontAwesome.circle_o,
+                            color: Colors.yellow, size: 15),
+                        Icon(FontAwesome.circle_o,
+                            color: Colors.yellow, size: 15),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 15),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
-                      child: Column(
-                        children: [
-                          TimelineTile(
-                            alignment: TimelineAlign.start,
-                            endChild: Container(
-                              color: Colors.amberAccent,
-                            ),
-                          ),
-                          Timeline(
-                            itemGap: 3,
-                            padding: EdgeInsets.zero,
-                            lineColor: Colors.yellow,
-                            indicatorColor: Colors.yellow,
-                            children: <Widget>[
-                              Container(
-                                child: Text(
-                                  "Roma",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              Container(
-                                child: Text(
-                                  "Pacra",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              Container(
-                                child: Text(
-                                  "Woodlands",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ],
-                            indicators: <Widget>[
-                              Icon(FontAwesome.circle_o,
-                                  color: Colors.yellow, size: 15),
-                              Icon(FontAwesome.circle_o,
-                                  color: Colors.yellow, size: 15),
-                              Icon(FontAwesome.circle_o,
-                                  color: Colors.yellow, size: 15),
-                            ],
-                          ),
-                        ],
+                      child: Container(
+                        child: dataValue.type.toString() == "BusinessToBusiness"
+                            ? dataValue.businessrequesttripSet!.isNotEmpty
+                                ? Text(
+                                    "Trip Description:\n${dataValue.businessrequesttripSet?.first.tripDescription}",
+                                    textAlign: TextAlign.left,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                    ),
+                                  )
+                                : const Text("NO TRIP DESCRIPTION")
+                            : SizedBox(height: 0),
                       ),
                     ),
                     Column(
@@ -233,7 +323,7 @@ class _HomeActivityState extends State<DriverPickUp> {
                           height: 30,
                         ),
                         Text(
-                          "20 km",
+                          "${destinationInformation?.totalDistance}",
                           style: TextStyle(
                               color: Colors.white, fontWeight: FontWeight.bold),
                         ),
@@ -269,6 +359,32 @@ class _HomeActivityState extends State<DriverPickUp> {
     );
   }
 
+  Widget mapBody() {
+    return GoogleMap(
+      mapType: MapType.normal,
+      initialCameraPosition: googleMapsProvider.defaultDestination,
+      zoomControlsEnabled: false,
+      onMapCreated: (GoogleMapController controller) {
+        _mapController.complete(controller);
+      },
+      markers: {
+        if (originMarker != null) originMarker!,
+        if (destinationMarker != null) destinationMarker!
+      },
+      polylines: {
+        if (destinationInformation != null)
+          Polyline(
+            polylineId: const PolylineId('overview_polyline'),
+            color: Colors.orange,
+            width: 8,
+            points: destinationInformation!.polylinePoints
+                .map((e) => LatLng(e.latitude, e.longitude))
+                .toList(),
+          ),
+      },
+    );
+  }
+
   Widget acceptanceOptions(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -277,7 +393,7 @@ class _HomeActivityState extends State<DriverPickUp> {
         children: [
           ElevatedButton(
             onPressed: () {
-              Navigator.pushNamed(context, CallScreen.id);
+              launchURL(url: "${model.user?.phoneNumber}");
             },
             style: ButtonStyle(
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -307,22 +423,16 @@ class _HomeActivityState extends State<DriverPickUp> {
           ),
           ElevatedButton(
             onPressed: () async {
-              PopUpDialogs dialogs = PopUpDialogs(context: context);
-              dialogs.showLoadingAnimation(context: context);
-              TripProvider provider = TripProvider();
-              var response = await provider.updateTripData(jsonBody: {
-                "id": "${model.allRequestTrip?[0].id}",
-                "status": "ON TRIP",
-              });
-              dialogs.closeDialog();
-              if (response.updateRequestTrip?.response == "200") {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => OnTrip(),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UnnecessaryScreen(
+                    model: model,
+                    acceptTripId: acceptTripId,
+                    profilePhoto: profilePhoto,
                   ),
-                );
-              }
+                ),
+              );
             },
             style: ButtonStyle(
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -344,30 +454,5 @@ class _HomeActivityState extends State<DriverPickUp> {
         ],
       ),
     );
-  }
-
-  mapMarkers({
-    required double latitude,
-    required double longitude,
-    required String title,
-  }) {
-    return Marker(
-      width: 300.0,
-      height: 200.0,
-      point: LatLng(latitude, longitude),
-      builder: (ctx) => Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image.asset("assets/images/Pickup.png", height: 50),
-          ],
-        ),
-      ),
-    );
-  }
-
-  callme() async {
-    await Future.delayed(Duration(seconds: 1));
-    return "success";
   }
 }

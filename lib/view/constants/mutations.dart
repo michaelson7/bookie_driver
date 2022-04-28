@@ -52,18 +52,29 @@ mutation verifyPhoneNumber(
   }
 }
 """;
+String allSkills = """
+query {
+allSkills {
+id,
+name
+}
+}
+""";
 
 String createDriver = """
 mutation createDriver(
   \$user: ID!,
-  \$nrcNumber:String!,
+  \$address:String!,
   \$skills:[ID]!,
+  \$license:Upload!,
   ){
    createDriver(data: {
     user:\$user,
-    nrcNumber:\$nrcNumber,
+    address:\$address,
     skills: \$skills
-  }) {
+  },
+   license:\$license
+  ) {
     response,
     message
   }
@@ -103,9 +114,17 @@ query{
     firstName,
     lastName,
     email,
+    phoneNumber,
+    isActive,
+    profilepictureSet{
+      image, 
+    },
     driverSet{
       active,
-      id
+      id,
+      skills{
+        name
+      }
     }
   }
 }
@@ -120,6 +139,7 @@ mutation addDriverVehicle(
   \$insuranceDate: String!, 
   \$roadTaxDate: String!, 
   \$registrationPlate: String!, 
+  \$image: Upload!,
 ){
   addDriverVehicle(data: {
     vehicleClass: \$vehicleClass
@@ -129,9 +149,20 @@ mutation addDriverVehicle(
     insuranceDate: \$insuranceDate,
     roadTaxDate: \$roadTaxDate,
     registrationPlate: \$registrationPlate,
-  }){
+  },
+  image: \$image
+  ){
     response
     message
+  }
+}
+""";
+
+String allVehicleClass = """
+query {
+  allVehicleClass{
+    id,
+    name
   }
 }
 """;
@@ -157,8 +188,10 @@ String addRequestTrip = """
 mutation  addRequestTrip(
   \$user: ID!, 
   \$status: String!, 
+  \$startNameLocation: String!, 
   \$startLatitude: String!, 
   \$startLongitude: String!, 
+  \$endNameLocation: String!, 
   \$endLatitude: String!, 
  \$endLongitude: String!, 
 ){
@@ -168,10 +201,12 @@ mutation  addRequestTrip(
      status:\$status
   },
     pickupLocation:{
+      name:\$startNameLocation,
       latitude:\$startLatitude,
       longitude:\$startLongitude
     },
      endLocation:{
+      name:\$endNameLocation,
       latitude:\$endLatitude,
       longitude:\$endLongitude
     }
@@ -219,20 +254,30 @@ mutation  updateRequestTrip(
 String allRequestTrip = """
 query {
   allRequestTrip {
-    id
+    id,
+    type,
     user{
-      firstName
-      lastName
-      phoneNumber
+      firstName,
+      lastName,
+      phoneNumber,
+      profilepictureSet{
+        image, 
+      },
     }
     status
     pickupLocation{
       latitude
       longitude
+      name
     },endLocation{
       latitude,
       longitude
+      name
     },
+    businessrequesttripSet{
+      tripDescription,
+      skills
+    }
   }
 }
 """;
@@ -251,6 +296,131 @@ query{
       longitude
     },
     date
+  }
+}
+""";
+
+String addAcceptTrip = """
+mutation  addAcceptTrip(
+  \$requestTripId: ID!, 
+  \$driverId: ID!,   
+){
+  addAcceptTrip(
+   data:{
+     requestTripId: \$requestTripId,
+     driverId:\$driverId
+  } 
+  ){
+    response,
+    message,
+    acceptTrip{
+      id
+    }
+  }
+}
+""";
+
+String addTrip = """
+mutation addTrip(\$acceptId: ID!,
+ \$endLocationName: String!, 
+ \$endLocationLatituide: String!, 
+ \$endLocationLongitude: String!, 
+ \$startLocationName: String!, 
+ \$startLocationLatituide: String!,
+  \$startLocationLongitude: String!) {
+  addTrip(
+    data: {
+      acceptId: \$acceptId
+      }, 
+      endLocation: {
+        name: \$endLocationName,
+        latitude: \$endLocationLatituide, 
+        longitude: \$endLocationLongitude
+      }, 
+      startLocation: {
+        name: \$startLocationName,
+        latitude: \$startLocationLatituide, 
+        longitude: \$startLocationLongitude
+      }) {
+    response
+    message
+    trip {
+      id
+    }
+  }
+}
+""";
+
+String forgotPassword = """
+mutation  forgotPassword(
+  \$email: String!,   
+){
+  forgotPassword(
+    data:{
+      email:\$email
+    }
+  ){
+    response,
+    message, 
+  }
+}
+""";
+
+String resetPassword = """
+mutation  resetPassword(
+  \$email: String!, 
+  \$otp: String!,
+  \$password1: String!,
+  \$password2: String!
+){ 
+  resetPassword(
+    data:{
+      email:\$email,
+      otp:\$otp,
+      password1:\$password1,
+      password2:\$password2
+    }
+  ){
+    response,
+    message, 
+  }
+}
+""";
+
+String uploadProfilePicture = """
+mutation  uploadProfilePicture(
+  \$user: ID!, 
+  \$image: Upload!, 
+){
+  uploadProfilePicture(
+   data:{
+     user:\$user, 
+   }, 
+   image:\$image
+  ){
+    success,
+    profilePicture{image}
+  }
+}
+""";
+
+String updateAccount = """
+ mutation  uploadProfilePicture(
+  \$userId: ID!, 
+  \$firstName: String!, 
+  \$lastName: String!, 
+  \$email: String!, 
+){
+  updateAccount(
+   data:{
+    userId:\$userId, 
+    firstName:\$firstName, 
+    lastName:\$lastName,
+    email:\$email,
+  }
+  ){
+    response,
+    message
   }
 }
 """;

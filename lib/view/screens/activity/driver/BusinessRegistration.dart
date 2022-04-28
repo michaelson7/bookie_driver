@@ -1,4 +1,5 @@
 import 'package:bookie_driver/view/constants/constants.dart';
+import 'package:bookie_driver/view/screens/activity/driver/DriverHomeInit.dart';
 import 'package:bookie_driver/view/screens/activity/driver/vechileDetails.dart';
 import 'package:bookie_driver/view/widgets/gradientButton.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,16 +10,16 @@ import '../../../constants/constants.dart';
 import '../../../constants/enum.dart';
 import 'driver_dashboard.dart';
 
-class DriverAccountDetails extends StatefulWidget {
+class BusinessRegistration extends StatefulWidget {
   static String id = "DriverAccountDetails";
-  const DriverAccountDetails({Key? key}) : super(key: key);
+  const BusinessRegistration({Key? key}) : super(key: key);
 
   @override
   _HomeActivityState createState() => _HomeActivityState();
 }
 
 // Navigator.popAndPushNamed(context, LoginActivity.id);
-class _HomeActivityState extends State<DriverAccountDetails> {
+class _HomeActivityState extends State<BusinessRegistration> {
   SharedPreferenceProvider _sp = SharedPreferenceProvider();
   @override
   Widget build(BuildContext context) {
@@ -75,7 +76,7 @@ class _HomeActivityState extends State<DriverAccountDetails> {
                   padding: const EdgeInsets.all(8.0),
                   child: gradientButton(
                     function: () {
-                      Navigator.popAndPushNamed(context, DriverDashboard.id);
+                      Navigator.popAndPushNamed(context, DriverHomeInit.id);
                     },
                     title: "SAVE",
                   ),
