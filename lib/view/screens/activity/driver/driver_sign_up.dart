@@ -205,53 +205,57 @@ class _HomeActivityState extends State<DriverSignUp> {
 
   //FUNCTIONS
   Future<void> RegisterUser() async {
-    PopUpDialogs popUpDialogs = PopUpDialogs(context: context);
-    popUpDialogs.showLoadingAnimation(
-      context: context,
-      message: "Processing",
-    );
-    UserModel model = UserModel(
-      id: "5",
-      photo: "",
-      email: _emailController.text,
-      phoneNumber: _phoneNumber.text,
-      firstName: _fullNameController.text.split(" ").length > 1
-          ? _fullNameController.text.split(" ")[0]
-          : "",
-      lastName: _fullNameController.text.split(" ").length > 1
-          ? _fullNameController.text.split(" ")[1]
-          : "",
-      password: _passwordController.text,
-    );
-    var data = await _registrationProvider.RegisterUser(model: model);
-    popUpDialogs.closeDialog();
-    if (!data.hasException) {
-      var responseBody = data.data;
-      var response = responseBody!["createAccount"];
-      if (response!["response"] == 200) {
-        //save to sp
-        toastMessage(context: context, message: "Registration Successful");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DriverOTP(
-              phoneNumber: _phoneNumber.text,
-              password: _passwordController.text,
-              isDriver: true,
+    if (_formKey.currentState!.validate()) {
+      PopUpDialogs popUpDialogs = PopUpDialogs(context: context);
+      popUpDialogs.showLoadingAnimation(
+        context: context,
+        message: "Processing",
+      );
+      UserModel model = UserModel(
+        id: "5",
+        photo: "",
+        email: _emailController.text,
+        phoneNumber: _phoneNumber.text,
+        firstName: _fullNameController.text.split(" ").length > 1
+            ? _fullNameController.text.split(" ")[0]
+            : "",
+        lastName: _fullNameController.text.split(" ").length > 1
+            ? _fullNameController.text.split(" ")[1]
+            : "",
+        password: _passwordController.text,
+      );
+      var data = await _registrationProvider.RegisterUser(model: model);
+      popUpDialogs.closeDialog();
+      if (!data.hasException) {
+        var responseBody = data.data;
+        var response = responseBody!["createAccount"];
+        if (response!["response"] == 200) {
+          //save to sp
+          toastMessage(context: context, message: "Registration Successful");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DriverOTP(
+                phoneNumber: _phoneNumber.text,
+                password: _passwordController.text,
+                isDriver: true,
+              ),
             ),
-          ),
-        );
+          );
+        } else {
+          toastMessage(
+            context: context,
+            message: "Error, ${response["message"]}",
+          );
+        }
       } else {
         toastMessage(
           context: context,
-          message: "Error, ${response["message"]}",
+          message: "Error, ${data.exception.toString()}",
         );
       }
     } else {
-      toastMessage(
-        context: context,
-        message: "Error, ${data.exception.toString()}",
-      );
+      toastMessage(context: context, message: "Please add required data");
     }
   }
 

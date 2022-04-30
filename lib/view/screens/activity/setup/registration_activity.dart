@@ -93,7 +93,7 @@ class _HomeActivityState extends State<RegistrationActivity> {
                 icon: Icons.email,
                 controller: _emailController,
                 hintText: "Email Address",
-                errorMessage: "Please enter Email",
+                errorMessage: "",
               ),
               Divider(color: Colors.grey),
               materialTextField(
@@ -104,7 +104,7 @@ class _HomeActivityState extends State<RegistrationActivity> {
               ),
               Divider(color: Colors.grey),
               materialTextField(
-                icon: FontAwesome.eye,
+                icon: FontAwesome.lock,
                 hintText: "Password",
                 controller: _passwordController,
                 obscureText: true,
@@ -215,7 +215,7 @@ class _HomeActivityState extends State<RegistrationActivity> {
           Expanded(
             child: TextFormField(
               validator: (value) {
-                if (value == null || value.isEmpty) {
+                if (value == null || value.isEmpty && errorMessage != "") {
                   return errorMessage;
                 }
                 return null;
@@ -329,54 +329,58 @@ class _HomeActivityState extends State<RegistrationActivity> {
   }
 
   Future<void> RegisterUser() async {
-    RegistrationProvider _registrationProvider = RegistrationProvider();
-    PopUpDialogs popUpDialogs = PopUpDialogs(context: context);
-    popUpDialogs.showLoadingAnimation(
-      context: context,
-      message: "Processing",
-    );
-    UserModel model = UserModel(
-      id: "5",
-      photo: "",
-      email: _emailController.text.trim(),
-      phoneNumber: _phoneNumber.text.trim(),
-      firstName: _fullNameController.text.split(" ").length > 1
-          ? _fullNameController.text.split(" ")[0]
-          : "",
-      lastName: _fullNameController.text.split(" ").length > 1
-          ? _fullNameController.text.split(" ")[1]
-          : "",
-      password: _passwordController.text.trim(),
-    );
-    var data = await _registrationProvider.RegisterUser(model: model);
-    popUpDialogs.closeDialog();
-    if (!data.hasException) {
-      var responseBody = data.data;
-      var response = responseBody!["createAccount"];
-      if (response!["response"] == 200) {
-        //save to sp
-        toastMessage(context: context, message: "Registration Successful");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DriverOTP(
-              phoneNumber: _phoneNumber.text,
-              password: _passwordController.text,
-              isDriver: true,
+    if (_formKey.currentState!.validate()) {
+      RegistrationProvider _registrationProvider = RegistrationProvider();
+      PopUpDialogs popUpDialogs = PopUpDialogs(context: context);
+      popUpDialogs.showLoadingAnimation(
+        context: context,
+        message: "Processing",
+      );
+      UserModel model = UserModel(
+        id: "5",
+        photo: "",
+        email: _emailController.text.trim(),
+        phoneNumber: _phoneNumber.text.trim(),
+        firstName: _fullNameController.text.split(" ").length > 1
+            ? _fullNameController.text.split(" ")[0]
+            : "",
+        lastName: _fullNameController.text.split(" ").length > 1
+            ? _fullNameController.text.split(" ")[1]
+            : "",
+        password: _passwordController.text.trim(),
+      );
+      var data = await _registrationProvider.RegisterUser(model: model);
+      popUpDialogs.closeDialog();
+      if (!data.hasException) {
+        var responseBody = data.data;
+        var response = responseBody!["createAccount"];
+        if (response!["response"] == 200) {
+          //save to sp
+          toastMessage(context: context, message: "Registration Successful");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DriverOTP(
+                phoneNumber: _phoneNumber.text,
+                password: _passwordController.text,
+                isDriver: true,
+              ),
             ),
-          ),
-        );
+          );
+        } else {
+          toastMessage(
+            context: context,
+            message: "Error, ${response["message"]}",
+          );
+        }
       } else {
         toastMessage(
           context: context,
-          message: "Error, ${response["message"]}",
+          message: "Error, ${data.exception.toString()}",
         );
       }
     } else {
-      toastMessage(
-        context: context,
-        message: "Error, ${data.exception.toString()}",
-      );
+      toastMessage(context: context, message: "Please add required data");
     }
   }
 }

@@ -229,49 +229,57 @@ class _HomeActivityState extends State<LoginActivity> {
   }
 
   Future<void> RegisterUser() async {
-    RegistrationProvider _registrationProvider = RegistrationProvider();
-    PopUpDialogs popUpDialogs = PopUpDialogs(context: context);
-    popUpDialogs.showLoadingAnimation(
-      context: context,
-      message: "Processing",
-    );
-    var data = await _registrationProvider.LoginUser(
-      number: userNameController.text,
-      password: passwordController.text,
-    );
+    if (_formKey.currentState!.validate()) {
+      RegistrationProvider _registrationProvider = RegistrationProvider();
+      PopUpDialogs popUpDialogs = PopUpDialogs(context: context);
+      popUpDialogs.showLoadingAnimation(
+        context: context,
+        message: "Processing",
+      );
+      var data = await _registrationProvider.LoginUser(
+        number: userNameController.text,
+        password: passwordController.text,
+      );
 
-    if (!data.hasException) {
-      var response = data.data;
-      bool responseVal = response!["tokenAuth"]["success"];
-      if (responseVal) {
-        var responseVal = await _registrationProvider.getUserId();
-        UserDataModel userDataModel = UserDataModel.fromJson(
-          responseVal.data!,
-        );
-        popUpDialogs.closeDialog();
-        if (userDataModel.me!.driverSet!.isNotEmpty) {
-          toastMessage(context: context, message: "Authentication Successful");
-          _sharedPreferenceProvider.setString(
-            key: "AccountType",
-            value: "driver",
+      if (!data.hasException) {
+        var response = data.data;
+        bool responseVal = response!["tokenAuth"]["success"];
+        if (responseVal) {
+          var responseVal = await _registrationProvider.getUserId();
+          UserDataModel userDataModel = UserDataModel.fromJson(
+            responseVal.data!,
           );
-          Navigator.popAndPushNamed(context, DriverHomeInit.id);
+          popUpDialogs.closeDialog();
+          if (userDataModel.me!.driverSet!.isNotEmpty) {
+            toastMessage(
+                context: context, message: "Authentication Successful");
+            _sharedPreferenceProvider.setString(
+              key: "AccountType",
+              value: "driver",
+            );
+            Navigator.popAndPushNamed(context, DriverHomeInit.id);
+          } else {
+            toastMessage(
+              context: context,
+              message: "Please sign in with driver account",
+            );
+          }
         } else {
+          popUpDialogs.closeDialog();
           toastMessage(
             context: context,
-            message: "Please sign in with driver account",
+            message: "Please check phone number and password",
           );
         }
       } else {
         popUpDialogs.closeDialog();
-        toastMessage(context: context, message: "Account does not exist");
+        toastMessage(
+          context: context,
+          message: "Error, ${data.exception.toString()}",
+        );
       }
     } else {
-      popUpDialogs.closeDialog();
-      toastMessage(
-        context: context,
-        message: "Error, ${data.exception.toString()}",
-      );
+      toastMessage(context: context, message: "Please add required data");
     }
   }
 

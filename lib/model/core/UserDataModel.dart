@@ -82,12 +82,14 @@ class DriverSet {
     required this.active,
     required this.id,
     this.skills,
+    this.drivervehicleSet,
   });
 
   String typename;
   bool active;
   String id;
   List<Skill>? skills;
+  List<DrivervehicleSet>? drivervehicleSet;
 
   factory DriverSet.fromJson(Map<String, dynamic> json) => DriverSet(
         typename: json["__typename"] == null ? null : json["__typename"],
@@ -96,6 +98,10 @@ class DriverSet {
         skills: json["skills"] == null
             ? null
             : List<Skill>.from(json["skills"].map((x) => Skill.fromJson(x))),
+        drivervehicleSet: json["drivervehicleSet"] == null
+            ? null
+            : List<DrivervehicleSet>.from(json["drivervehicleSet"]
+                .map((x) => DrivervehicleSet.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
@@ -105,6 +111,48 @@ class DriverSet {
         "skills": skills == null
             ? null
             : List<dynamic>.from(skills!.map((x) => x.toJson())),
+        "drivervehicleSet": drivervehicleSet == null
+            ? null
+            : List<dynamic>.from(drivervehicleSet!.map((x) => x.toJson())),
+      };
+}
+
+class DrivervehicleSet {
+  DrivervehicleSet({
+    required this.typename,
+    required this.registrationPlate,
+    required this.modelName,
+    required this.modelColor,
+    required this.image,
+  });
+
+  String typename;
+  String registrationPlate;
+  String modelName;
+  String modelColor;
+  String? image;
+
+  factory DrivervehicleSet.fromJson(Map<String, dynamic> json) =>
+      DrivervehicleSet(
+        typename: json["__typename"] == null ? null : json["__typename"],
+        registrationPlate: json["registrationPlate"] == null
+            ? null
+            : json["registrationPlate"],
+        modelName: json["modelName"] == null ? null : json["modelName"],
+        modelColor: json["modelColor"] == null ? null : json["modelColor"],
+        image: json["image"] == null
+            ? null
+            : "https://bookie-media.s3.af-south-1.amazonaws.com/" +
+                json["image"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "__typename": typename == null ? null : typename,
+        "registrationPlate":
+            registrationPlate == null ? null : registrationPlate,
+        "modelName": modelName == null ? null : modelName,
+        "modelColor": modelColor == null ? null : modelColor,
+        "image": image == null ? null : image,
       };
 }
 

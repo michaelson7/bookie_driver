@@ -1,4 +1,4 @@
-import 'package:bookie_driver/model/core/UserDataModel.dart';
+import 'UserDataModel.dart';
 
 class TripListModel {
   TripListModel({
@@ -32,15 +32,15 @@ class AllRequestTrip {
     required this.type,
     this.user,
     required this.status,
-    this.pickupLocation,
-    this.endLocation,
+    required this.pickupLocation,
+    required this.endLocation,
     this.businessrequesttripSet,
   });
 
   String typename;
   String id;
   String type;
-  User? user;
+  Me? user;
   String status;
   Location? pickupLocation;
   Location? endLocation;
@@ -50,7 +50,7 @@ class AllRequestTrip {
         typename: json["__typename"] == null ? null : json["__typename"],
         id: json["id"] == null ? null : json["id"],
         type: json["type"] == null ? null : json["type"],
-        user: json["user"] == null ? null : User.fromJson(json["user"]),
+        user: json["user"] == null ? null : Me.fromJson(json["user"]),
         status: json["status"] == null ? null : json["status"],
         pickupLocation: json["pickupLocation"] == null
             ? null
@@ -82,23 +82,62 @@ class AllRequestTrip {
 
 class BusinessrequesttripSet {
   BusinessrequesttripSet({
-    this.typename,
-    this.tripDescription,
+    required this.typename,
+    required this.tripDescription,
+    this.skills,
+    this.file,
   });
 
-  String? typename;
-  String? tripDescription;
+  String typename;
+  String tripDescription;
+  List<Skill>? skills;
+  String? file;
 
   factory BusinessrequesttripSet.fromJson(Map<String, dynamic> json) =>
       BusinessrequesttripSet(
         typename: json["__typename"] == null ? null : json["__typename"],
         tripDescription:
             json["tripDescription"] == null ? null : json["tripDescription"],
+        skills: json["skills"] == null
+            ? null
+            : List<Skill>.from(json["skills"].map((x) => Skill.fromJson(x))),
+        file: json["file"] == null
+            ? null
+            : "https://bookie-media.s3.af-south-1.amazonaws.com/" +
+                json["file"],
       );
 
   Map<String, dynamic> toJson() => {
         "__typename": typename == null ? null : typename,
         "tripDescription": tripDescription == null ? null : tripDescription,
+        "skills": skills == null
+            ? null
+            : List<dynamic>.from(skills!.map((x) => x.toJson())),
+        "file": file == null ? null : file,
+      };
+}
+
+class Skill {
+  Skill({
+    required this.typename,
+    required this.id,
+    required this.name,
+  });
+
+  String typename;
+  String id;
+  String name;
+
+  factory Skill.fromJson(Map<String, dynamic> json) => Skill(
+        typename: json["__typename"] == null ? null : json["__typename"],
+        id: json["id"] == null ? null : json["id"],
+        name: json["name"] == null ? null : json["name"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "__typename": typename == null ? null : typename,
+        "id": id == null ? null : id,
+        "name": name == null ? null : name,
       };
 }
 
@@ -127,42 +166,5 @@ class Location {
         "latitude": latitude == null ? null : latitude,
         "longitude": longitude == null ? null : longitude,
         "name": name == null ? null : name,
-      };
-}
-
-class User {
-  User({
-    required this.typename,
-    required this.firstName,
-    required this.lastName,
-    required this.phoneNumber,
-    this.profilepictureSet,
-  });
-
-  String typename;
-  String firstName;
-  String lastName;
-  String phoneNumber;
-  List<ProfilepictureSet>? profilepictureSet;
-
-  factory User.fromJson(Map<String, dynamic> json) => User(
-        typename: json["__typename"] == null ? null : json["__typename"],
-        firstName: json["firstName"] == null ? null : json["firstName"],
-        lastName: json["lastName"] == null ? null : json["lastName"],
-        phoneNumber: json["phoneNumber"] == null ? null : json["phoneNumber"],
-        profilepictureSet: json["profilepictureSet"] == null
-            ? null
-            : List<ProfilepictureSet>.from(json["profilepictureSet"]
-                .map((x) => ProfilepictureSet.fromJson(x))),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "__typename": typename == null ? null : typename,
-        "firstName": firstName == null ? null : firstName,
-        "lastName": lastName == null ? null : lastName,
-        "phoneNumber": phoneNumber == null ? null : phoneNumber,
-        "profilepictureSet": profilepictureSet == null
-            ? null
-            : List<dynamic>.from(profilepictureSet!.map((x) => x.toJson())),
       };
 }

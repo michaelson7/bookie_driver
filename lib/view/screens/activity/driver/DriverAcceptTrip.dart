@@ -16,6 +16,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:timeline_tile/timeline_tile.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../model/core/TripListModel.dart';
 import '../../../../model/core/UserDataModel.dart';
@@ -179,23 +180,12 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
           ),
         ],
       ),
-      body: BottomDragInit(),
-      // drawer: buildDrawer(
-      //   context: context,
-      //   isDriver: isDriver,
-      //   profilePhoto: profilePhoto,
-      // ),
-    );
-  }
-
-  Widget BottomDragInit() {
-    return DraggableBottomSheet(
-      backgroundWidget: mapBody(),
-      previewChild: dragContainer(),
-      expandedChild: dragContainer(),
-      minExtent: 380,
-      blurBackground: false,
-      //maxExtent: MediaQuery.of(context).size.height * 0.8,
+      body: Column(
+        children: [
+          Expanded(child: mapBody()),
+          dragContainer(),
+        ],
+      ),
     );
   }
 
@@ -240,6 +230,17 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
   tripDetails() {
     var dataValue = model.allRequestTrip![tripCounter];
     allRequestTrip = dataValue;
+    var skillsList = "";
+
+    try {
+      for (var data in dataValue.businessrequesttripSet!.first.skills!) {
+        setState(() {
+          skillsList = skillsList + data.name + " ,";
+        });
+      }
+    } on Exception catch (e) {
+      // TODO
+    }
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
@@ -364,7 +365,7 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
                 dataValue.type.toString() == "BusinessToBusiness"
                     ? dataValue.businessrequesttripSet!.isNotEmpty
                         ? Text(
-                            "Required Skills:\n${dataValue.businessrequesttripSet?.join(",")}",
+                            "Required Skills:\n${skillsList}",
                             textAlign: TextAlign.left,
                             style: const TextStyle(
                               color: Colors.white,
@@ -372,6 +373,32 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
                             ),
                           )
                         : const Text("NO REQUIRED SKILLS")
+                    : const SizedBox(height: 0),
+                const SizedBox(height: 15),
+                dataValue.type.toString() == "BusinessToBusiness"
+                    ? dataValue.businessrequesttripSet!.isNotEmpty
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Downloadable File:",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  var url = dataValue
+                                      .businessrequesttripSet?.first.file;
+                                  await _launchURL(url);
+                                },
+                                child: Text("Open File"),
+                              ),
+                            ],
+                          )
+                        : const Text("NO FILE UPLOADED", style: kTextStyleWhite)
                     : const SizedBox(height: 0),
                 const SizedBox(height: 15),
                 Row(
@@ -570,6 +597,17 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
       );
       await setMap();
       dialog.closeDialog();
+    }
+  }
+
+  _launchURL(url) async {
+    try {
+      await launch(
+        url,
+        enableJavaScript: true,
+      );
+    } catch (e) {
+      toastMessage(context: context, message: "Could not open file");
     }
   }
 }

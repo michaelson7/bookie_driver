@@ -124,6 +124,12 @@ query{
       id,
       skills{
         name
+      },
+      drivervehicleSet{ 
+        registrationPlate,
+        modelName,
+        modelColor,
+        image
       }
     }
   }
@@ -275,8 +281,12 @@ query {
       name
     },
     businessrequesttripSet{
-      tripDescription,
-      skills
+      tripDescription, 
+      skills{
+        id,
+        name
+      },
+      file
     }
   }
 }

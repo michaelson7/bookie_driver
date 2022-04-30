@@ -162,7 +162,7 @@ class _HomeActivityState extends State<DriverPicture> {
                 children: [
                   options(
                     hint: "License ID",
-                    hintPro: "Baxk",
+                    hintPro: "Back",
                     showIcon: true,
                   ),
                   selectedLicenseBack
@@ -279,7 +279,6 @@ class _HomeActivityState extends State<DriverPicture> {
         dialog.closeDialog();
         loggerAccent(message: driverResponse.toJson().toString());
         if (driverResponse.createDriver!.response == 200) {
-          loggerError(message: "message");
           Navigator.popAndPushNamed(context, VechileDetails.id);
         } else {
           toastMessage(

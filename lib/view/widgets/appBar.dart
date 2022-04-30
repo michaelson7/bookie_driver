@@ -4,7 +4,7 @@ import '../constants/constants.dart';
 
 CustomAppBar({
   required title,
-  Color color = kAccent,
+  Color color = Colors.white,
   List<Widget>? action,
 }) {
   return AppBar(
@@ -12,13 +12,13 @@ CustomAppBar({
       title,
       style: TextStyle(
         fontSize: 20,
-        color: Colors.black,
+        color: color == Colors.white ? Colors.black : Colors.white,
       ),
     ),
     iconTheme: IconThemeData(
       color: Colors.black, //change your color here
     ),
-    backgroundColor: Colors.white,
+    backgroundColor: color,
     actions: action,
   );
 }

@@ -91,7 +91,6 @@ class _DriverDashboardState extends State<DriverDashboard> {
             ? const Center(child: CircularProgressIndicator())
             : buildContainer(),
       ),
-      bottomNavigationBar: offlineButton(),
     );
   }
 
@@ -537,30 +536,6 @@ class _DriverDashboardState extends State<DriverDashboard> {
     );
   }
   /*BOTTOM TABS*/
-
-  // WIDGETS
-  Padding offlineButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 35, vertical: 8),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all<Color>(
-              Color(0xFFFF0C51),
-            ),
-          ),
-          onPressed: () {
-            //TODO: add button funationality
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Text("Go Offline"),
-          ),
-        ),
-      ),
-    );
-  }
 
   Widget tabButtons({
     bool isActive = false,

@@ -28,6 +28,9 @@ class _HomeActivityState extends State<PasswordReset> {
       confirmPasswordController = TextEditingController();
   String otpValueController = "";
   var _formKey = GlobalKey<FormState>();
+  bool _passwordVisible = false;
+  bool _passwordVisible2 = false;
+  int passwordLevel = 0;
   _HomeActivityState(this.email);
 
   @override
@@ -115,23 +118,82 @@ class _HomeActivityState extends State<PasswordReset> {
             borderRadius: kBorderRadiusCircularPro,
             color: Colors.grey[200],
             child: ListTile(
-              leading: Icon(FontAwesome.eye, color: Colors.black),
+              leading: Icon(FontAwesome.lock, color: Colors.black),
               title: TextField(
                 controller: newPasswordController,
-                obscureText: true,
+                obscureText: !_passwordVisible,
+                decoration: new InputDecoration(
+                  border: InputBorder.none,
+                  labelText: 'Password',
+                  hintText: 'Enter Password',
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _passwordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Theme.of(context).primaryColorDark,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _passwordVisible = !_passwordVisible;
+                      });
+                    },
+                  ),
+                ),
+                onChanged: (value) {
+                  RegExp regex = RegExp(
+                      r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
+                  RegExp regex2 = RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z]).{4,}$');
+                  RegExp regex3 = RegExp(r'^.{2,}$');
+                  if (regex.hasMatch(value)) {
+                    setState(() {
+                      passwordLevel = 3;
+                    });
+                  } else if (regex2.hasMatch(value)) {
+                    setState(() {
+                      passwordLevel = 2;
+                    });
+                  } else if (regex3.hasMatch(value)) {
+                    setState(() {
+                      passwordLevel = 1;
+                    });
+                  } else {
+                    setState(() {
+                      passwordLevel = 0;
+                    });
+                  }
+                },
               ),
             ),
           ),
           SizedBox(height: 20),
-          Text("ENTER NEW PASSWORD"),
+          Text("CONFIRM NEW PASSWORD"),
           SizedBox(height: 10),
           Material(
             borderRadius: kBorderRadiusCircularPro,
             color: Colors.grey[200],
             child: ListTile(
-              leading: Icon(FontAwesome.eye, color: Colors.black),
+              leading: Icon(FontAwesome.lock, color: Colors.black),
               title: TextField(
-                obscureText: true,
+                obscureText: !_passwordVisible2,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  labelText: 'Confirm Password',
+                  hintText: 'Enter Password',
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _passwordVisible2
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Theme.of(context).primaryColorDark,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _passwordVisible2 = !_passwordVisible2;
+                      });
+                    },
+                  ),
+                ),
                 controller: confirmPasswordController,
               ),
             ),
@@ -148,13 +210,22 @@ class _HomeActivityState extends State<PasswordReset> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            child: stepper(title: "Weak", color: Color(0xFFFD749B)),
+            child: stepper(
+              title: "Weak",
+              color: passwordLevel >= 1 ? Color(0xFFFD749B) : Colors.white24,
+            ),
           ),
           Expanded(
-            child: stepper(title: "Average"),
+            child: stepper(
+              title: "Average",
+              color: passwordLevel >= 2 ? Color(0xFFFD749B) : Colors.white24,
+            ),
           ),
           Expanded(
-            child: stepper(title: "Strong"),
+            child: stepper(
+              title: "Strong",
+              color: passwordLevel >= 3 ? Color(0xFFFD749B) : Colors.white24,
+            ),
           ),
         ],
       ),

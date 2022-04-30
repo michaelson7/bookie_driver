@@ -132,8 +132,9 @@ class _HomeActivityState extends State<DriverHomeInit>
             ),
           ),
         );
-        toastMessage(context: context, message: "Loading More");
-        hasRequest = false;
+        setState(() {
+          isOnline = false;
+        });
       }
       loggerInfo(message: "PRINTING $num");
       num++;
@@ -203,7 +204,8 @@ class _HomeActivityState extends State<DriverHomeInit>
       backgroundWidget: mapBody(),
       previewChild: isOnline ? offlineButton() : onlineButton(),
       expandedChild: isOnline ? offlineButton() : onlineButton(),
-      minExtent: 200,
+      minExtent: 80,
+      maxExtent: 80,
       blurBackground: false,
       //maxExtent: MediaQuery.of(context).size.height * 0.8,
     );
@@ -277,17 +279,35 @@ class _HomeActivityState extends State<DriverHomeInit>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          gradientButton(
-              title: "Go Online",
-              function: () async {
-                toastMessage(context: context, message: "Updating Location");
-                setState(() {
-                  loadingText = "Waiting for Trip Request";
-                  isOnline = true;
-                  size = 200;
-                });
-                await customerSearch();
-              }),
+          Padding(
+            padding: const EdgeInsets.all(15),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  setState(() {
+                    loadingText = "Waiting for Trip Request";
+                    isOnline = true;
+                    size = 200;
+                  });
+                  await customerSearch();
+                },
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.green),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Text("Go Online"),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -299,17 +319,32 @@ class _HomeActivityState extends State<DriverHomeInit>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          gradientButton(
-              title: "Go Offline",
-              function: () async {
-                toastMessage(context: context, message: "Going Offline");
-                setState(() {
-                  loadingText = "Waiting for Trip Request";
-                  isOnline = false;
-                  size = 200;
-                });
-                await customerSearch();
-              }),
+          Padding(
+            padding: const EdgeInsets.all(15),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  setState(() {
+                    isOnline = false;
+                    size = 200;
+                  });
+                },
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Text("Go Offline"),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
