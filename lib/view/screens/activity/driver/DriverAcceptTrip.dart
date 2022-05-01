@@ -222,6 +222,7 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
         children: [
           tripDetails(),
           acceptanceOptions(context),
+          SizedBox(height: 20),
         ],
       ),
     );
@@ -233,10 +234,12 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
     var skillsList = "";
 
     try {
-      for (var data in dataValue.businessrequesttripSet!.first.skills!) {
-        setState(() {
-          skillsList = skillsList + data.name + " ,";
-        });
+      if (dataValue.businessrequesttripSet!.isNotEmpty) {
+        for (var data in dataValue.businessrequesttripSet!.first.skills!) {
+          setState(() {
+            skillsList = skillsList + data.name + " ,";
+          });
+        }
       }
     } on Exception catch (e) {
       // TODO
@@ -361,7 +364,11 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
                           )
                         : const Text("NO TRIP DESCRIPTION")
                     : const SizedBox(height: 0),
-                const SizedBox(height: 15),
+                SizedBox(
+                  height: dataValue.type.toString() == "BusinessToBusiness"
+                      ? 15
+                      : 0,
+                ),
                 dataValue.type.toString() == "BusinessToBusiness"
                     ? dataValue.businessrequesttripSet!.isNotEmpty
                         ? Text(
@@ -374,7 +381,11 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
                           )
                         : const Text("NO REQUIRED SKILLS")
                     : const SizedBox(height: 0),
-                const SizedBox(height: 15),
+                SizedBox(
+                  height: dataValue.type.toString() == "BusinessToBusiness"
+                      ? 15
+                      : 0,
+                ),
                 dataValue.type.toString() == "BusinessToBusiness"
                     ? dataValue.businessrequesttripSet!.isNotEmpty
                         ? Column(
@@ -400,7 +411,11 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
                           )
                         : const Text("NO FILE UPLOADED", style: kTextStyleWhite)
                     : const SizedBox(height: 0),
-                const SizedBox(height: 15),
+                SizedBox(
+                  height: dataValue.type.toString() == "BusinessToBusiness"
+                      ? 15
+                      : 0,
+                ),
                 Row(
                   children: [
                     dataValue.type.toString() == "BusinessToBusiness"

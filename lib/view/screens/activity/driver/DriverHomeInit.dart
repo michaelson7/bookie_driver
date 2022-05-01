@@ -189,25 +189,19 @@ class _HomeActivityState extends State<DriverHomeInit>
           ),
         ],
       ),
-      body: BottomDragInit(),
+      body: Column(
+        children: [
+          Expanded(child: mapBody()),
+          isOnline ? offlineButton() : onlineButton(),
+          SizedBox(height: 20),
+        ],
+      ),
       drawer: buildDrawer(
         context: context,
         isDriver: isDriver,
         profilePhoto: profilePhoto,
         userName: name,
       ),
-    );
-  }
-
-  Widget BottomDragInit() {
-    return DraggableBottomSheet(
-      backgroundWidget: mapBody(),
-      previewChild: isOnline ? offlineButton() : onlineButton(),
-      expandedChild: isOnline ? offlineButton() : onlineButton(),
-      minExtent: 80,
-      maxExtent: 80,
-      blurBackground: false,
-      //maxExtent: MediaQuery.of(context).size.height * 0.8,
     );
   }
 

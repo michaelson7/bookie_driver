@@ -163,18 +163,13 @@ class _HomeActivityState extends State<DriverPickUp> {
           ),
         ],
       ),
-      body: BottomDragInit(),
-    );
-  }
-
-  Widget BottomDragInit() {
-    return DraggableBottomSheet(
-      backgroundWidget: mapBody(),
-      previewChild: dragContainer(),
-      expandedChild: dragContainer(),
-      minExtent: 380,
-      blurBackground: false,
-      //maxExtent: MediaQuery.of(context).size.height * 0.8,
+      body: Column(
+        children: [
+          Expanded(child: mapBody()),
+          dragContainer(),
+          SizedBox(height: 20),
+        ],
+      ),
     );
   }
 

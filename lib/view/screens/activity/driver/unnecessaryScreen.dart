@@ -191,23 +191,18 @@ class _HomeActivityState extends State<UnnecessaryScreen> {
           ),
         ],
       ),
-      body: BottomDragInit(),
+      body: Column(
+        children: [
+          Expanded(child: mapBody()),
+          dragContainer(),
+          SizedBox(height: 20),
+        ],
+      ),
       // drawer: buildDrawer(
       //   context: context,
       //   isDriver: isDriver,
       //   profilePhoto: profilePhoto,
       // ),
-    );
-  }
-
-  Widget BottomDragInit() {
-    return DraggableBottomSheet(
-      backgroundWidget: mapBody(),
-      previewChild: dragContainer(),
-      expandedChild: dragContainer(),
-      minExtent: 330,
-      blurBackground: false,
-      //maxExtent: MediaQuery.of(context).size.height * 0.8,
     );
   }
 

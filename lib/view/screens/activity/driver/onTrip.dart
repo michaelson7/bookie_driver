@@ -84,7 +84,12 @@ class _HomeActivityState extends State<OnTrip> {
             ? const Center(
                 child: CircularProgressIndicator(),
               )
-            : dragableThing(),
+            : Column(
+                children: [
+                  Expanded(child: buildContainer()),
+                  dragContainer(),
+                ],
+              ),
       ),
     );
   }
@@ -483,6 +488,7 @@ class _HomeActivityState extends State<OnTrip> {
     );
     popUpDialog.closeDialog();
     if (data.updateRequestTrip?.response == "200") {
+      _stopWatchTimer.dispose();
       Navigator.popAndPushNamed(context, DriverHomeInit.id);
     }
   }
