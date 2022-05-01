@@ -135,11 +135,19 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
       originMarker: originMarker!,
     );
     var destinationDistance = tripData!.totalDistance.split(" ").first;
+    double rate = double.parse(model.allRequestTrip![tripCounter].vehicleClass!
+        .vehiclebasepriceSet!.first.rate);
+    double min = double.parse(model.allRequestTrip![tripCounter].vehicleClass!
+        .vehiclebasepriceSet!.first.price);
     setState(() {
       //totalTime = "3";
       destinationMarker = destinationResult;
       destinationInformation = tripData;
-      total = double.parse(destinationDistance) * 10;
+      total = double.parse(destinationDistance) * rate;
+      if (total < min) {
+        total = min;
+      }
+      total = double.parse(total.toStringAsFixed(2));
     });
 
     //move to location

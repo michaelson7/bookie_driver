@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -94,6 +96,28 @@ class SharedPreferenceProvider {
       }
     } catch (e) {
       loggerError(message: 'Error on sharedPreferences [setString]: $e');
+    }
+  }
+
+  setBool({required String key, required bool value}) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      if (value != null) {
+        prefs.setBool(key, value);
+      }
+    } catch (e) {
+      loggerError(message: 'Error on sharedPreferences [setString]: $e');
+    }
+  }
+
+  Future<bool?> getBoolValue(String value) async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool? spItem = prefs.getBool(value);
+      return spItem;
+    } catch (e) {
+      loggerError(message: 'Error on sharedPreferences [getBoolValue]: $e');
     }
   }
 

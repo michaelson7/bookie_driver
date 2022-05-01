@@ -261,6 +261,13 @@ String allRequestTrip = """
 query {
   allRequestTrip {
     id,
+    vehicleClass{
+      name
+      vehiclebasepriceSet{
+        price,
+        rate
+      }
+    }
     type,
     user{
       firstName,
@@ -407,10 +414,63 @@ query{
       name
     },
     createdDate,
+    amount,
     modifiedDate,
     driverratingsSet{
       rateLevel
     }
+  }
+}
+""";
+
+String driverTripsSelection = """
+query{
+ b2bTrips {
+   start{
+      name
+    }
+    end{
+      name
+    },
+    createdDate,
+      amount,
+    modifiedDate,
+    driverratingsSet{
+      rateLevel
+    }
+},
+   c2bTrips {
+   start{
+      name
+    }
+    end{
+      name
+    },
+    createdDate,
+    modifiedDate,
+    driverratingsSet{
+      rateLevel
+    }
+ }
+}
+""";
+
+String driverStats = """
+query{
+  totalTrips, 
+  availableBalance,
+  tripAcceptanceRate,
+  totalTripCanceled,
+  registeredDate,
+  totalEarnings,
+   driverDepartment{
+    name,
+    business {
+      name
+    }
+  },
+   driverSkills {
+    name
   }
 }
 """;
@@ -432,6 +492,29 @@ mutation  uploadProfilePicture(
 }
 """;
 
+String dateFilter = """
+query uploadProfilePicture(
+  \$filter: String!, 
+){ 
+  dateFilter(period: \$filter){
+    start{
+      name
+    }
+    end{
+      name
+    },
+    createdDate,
+    modifiedDate,
+    amount,
+    driverratingsSet{
+      rateLevel
+    }
+	}
+}
+
+ 
+""";
+
 String updateAccount = """
  mutation  uploadProfilePicture(
   \$userId: ID!, 
@@ -445,6 +528,33 @@ String updateAccount = """
     firstName:\$firstName, 
     lastName:\$lastName,
     email:\$email,
+  }
+  ){
+    response,
+    message
+  }
+}
+""";
+
+String updateTrip = """
+ mutation  updateTrip(
+  \$tripId: ID!, 
+  \$amount: String!, 
+  \$distance: Int!,  
+  \$name:String!,
+  \$latitude: String!,
+  \$longitude: String!
+){
+  updateTrip(
+   data:{
+    tripId:\$tripId, 
+    amount:\$amount, 
+    distance:\$distance, 
+  },
+  endLocation:{
+    name:\$name,
+    latitude:\$latitude,
+    longitude:\$longitude
   }
   ){
     response,

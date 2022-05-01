@@ -501,6 +501,7 @@ class _HomeActivityState extends State<UnnecessaryScreen> {
                   MaterialPageRoute(
                     builder: (context) => OnTrip(
                       model: model,
+                      tripId: tripResponse.addTrip!.trip!.id!,
                       profilePhoto: profilePhoto,
                     ),
                   ),

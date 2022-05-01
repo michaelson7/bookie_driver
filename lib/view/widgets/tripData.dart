@@ -7,7 +7,9 @@ Widget tripData({
   required String time,
   required String location,
   required String amount,
+  double ratingVal = 0.0,
 }) {
+  var timeVal = int.parse(time.split(":")[0]);
   return Card(
     color: Colors.grey[900],
     child: Padding(
@@ -18,23 +20,28 @@ Widget tripData({
           paddedText(
             top: Text(time, style: TextStyle(color: Colors.white)),
             bottom: Text(
-              "AM",
+              timeVal <= 12 ? "AM" : "PM",
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          paddedText(
-            top: Text(
-              location,
-              style: TextStyle(color: Colors.white),
-            ),
-            bottom: StarRating(
-              rating: 3,
-              color: Colors.yellow,
-              onRatingChanged: (rating) => loggerInfo(
-                message: rating.toString(),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: paddedText(
+                top: Text(
+                  location,
+                  style: TextStyle(color: Colors.white),
+                ),
+                bottom: StarRating(
+                  rating: ratingVal,
+                  color: Colors.yellow,
+                  onRatingChanged: (rating) => loggerInfo(
+                    message: rating.toString(),
+                  ),
+                ),
               ),
             ),
           ),
@@ -44,7 +51,7 @@ Widget tripData({
               style: TextStyle(color: Colors.white),
             ),
             bottom: Text(
-              "Card",
+              "",
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -57,16 +64,18 @@ Widget tripData({
   );
 }
 
-Column paddedText({
+Widget paddedText({
   required Widget top,
   required Widget bottom,
 }) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      top,
-      SizedBox(height: 5),
-      bottom,
-    ],
+  return Container(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        top,
+        SizedBox(height: 5),
+        bottom,
+      ],
+    ),
   );
 }

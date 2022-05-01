@@ -31,26 +31,33 @@ import '../../../widgets/side_navigation.dart';
 class OnTrip extends StatefulWidget {
   static String id = "OnTrip";
   AllRequestTrip model;
+  String tripId;
   String profilePhoto;
-  OnTrip({Key? key, required this.model, required this.profilePhoto})
-      : super(key: key);
+  OnTrip({
+    Key? key,
+    required this.model,
+    required this.profilePhoto,
+    required this.tripId,
+  }) : super(key: key);
 
   @override
   _HomeActivityState createState() =>
-      _HomeActivityState(model, this.profilePhoto);
+      _HomeActivityState(model, this.profilePhoto, tripId);
 }
 
 class _HomeActivityState extends State<OnTrip> {
+  String tripId;
   TextEditingController destination = TextEditingController();
   SharedPreferenceProvider _sp = SharedPreferenceProvider();
   bool isDriver = false, isLoading = true;
   AllRequestTrip model;
-  _HomeActivityState(this.model, this.profilePhoto);
+  _HomeActivityState(this.model, this.profilePhoto, this.tripId);
   var total = 0.0;
   var currentTime = "";
   String profilePhoto;
   final StopWatchTimer _stopWatchTimer = StopWatchTimer(); // Create instance.
   var username = "";
+  var destinationDistance;
 
   Completer<GoogleMapController> _mapController = Completer();
   Marker? originMarker, destinationMarker;
@@ -459,12 +466,22 @@ class _HomeActivityState extends State<OnTrip> {
       pos: location,
       originMarker: originMarker!,
     );
-    var destinationDistance = tripData!.totalDistance.split(" ")[0];
+    destinationDistance = tripData!.totalDistance.split(" ")[0];
+    double rate = double.parse(
+      model.vehicleClass!.vehiclebasepriceSet!.first.rate,
+    );
+    double min = double.parse(
+      model.vehicleClass!.vehiclebasepriceSet!.first.price,
+    );
     setState(() {
       //totalTime = "3";
       destinationMarker = destinationResult;
       destinationInformation = tripData;
-      total = double.parse(destinationDistance) * 10;
+      total = double.parse(destinationDistance) * rate;
+      if (total < min) {
+        total = min;
+      }
+      total = double.parse(total.toStringAsFixed(2));
     });
 
     //move to location
@@ -476,6 +493,8 @@ class _HomeActivityState extends State<OnTrip> {
   }
 
   Future<void> completeTrip() async {
+    _stopWatchTimer.dispose();
+
     var tripProvider = TripProvider();
     var popUpDialog = PopUpDialogs(context: context);
 
@@ -486,10 +505,19 @@ class _HomeActivityState extends State<OnTrip> {
         "status": "COMPLETE",
       },
     );
+    var response = await tripProvider.updateTripRequest(
+      tripId: tripId,
+      amount: total,
+      distance: destinationDistance,
+      name: model.endLocation?.name,
+      latitude: model.endLocation?.latitude,
+      longitude: model.endLocation?.longitude,
+    );
     popUpDialog.closeDialog();
     if (data.updateRequestTrip?.response == "200") {
-      _stopWatchTimer.dispose();
       Navigator.popAndPushNamed(context, DriverHomeInit.id);
     }
   }
 }
+
+//

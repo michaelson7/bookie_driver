@@ -136,17 +136,6 @@ Drawer buildDrawer({
             child: Column(
               children: [
                 Text("Version : 1.0.0", style: TextStyle(fontSize: 13)),
-                Text("Last updated on", style: TextStyle(fontSize: 13)),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "7 January 2022 at 11:30 pm",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
               ],
             ),
           )

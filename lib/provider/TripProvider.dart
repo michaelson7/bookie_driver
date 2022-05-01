@@ -53,6 +53,33 @@ class TripProvider extends ChangeNotifier {
     return response;
   }
 
+  Future<QueryResult> updateTripRequest({
+    required tripId,
+    required amount,
+    required distance,
+    required name,
+    required latitude,
+    required longitude,
+  }) async {
+    UserTripData response = UserTripData();
+    var jsonBody = {
+      "tripId": tripId,
+      "amount": amount,
+      "distance": distance,
+      "name": name,
+      "latitude": latitude,
+      "longitude": longitude,
+    };
+    var data = await MutationRequest(
+      jsonBody: jsonBody,
+      mutation: updateTrip,
+    );
+    if (!data.hasException) {
+      //response = UserTripData.fromJson(data.data);
+    }
+    return data;
+  }
+
   Future<TripUpdateModel> updateTripData({
     required jsonBody,
   }) async {

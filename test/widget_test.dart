@@ -84,9 +84,37 @@ main() {
     var response = await _provider.getCarTypes();
   });
 
+  //
   test('getDriverTrips', () async {
     var _provider = DriverProvider();
     var response = await _provider.getDriverTrips();
+  });
+
+  test('getDriverStats', () async {
+    var _provider = DriverProvider();
+    var response = await _provider.getDriverStats();
+  });
+
+  test('driverSpecifcTrips', () async {
+    var _provider = DriverProvider();
+    var response = await _provider.driverSpecificTrips();
+  });
+
+  test('dateFilte', () async {
+    var _provider = DriverProvider();
+    var response = await _provider.dateFilte(filter: "week");
+  });
+
+  test('updateTripRequest', () async {
+    var _provider = TripProvider();
+    var response = await _provider.updateTripRequest(
+      tripId: "14",
+      amount: "500",
+      distance: "10",
+      name: "woodlands",
+      latitude: "100",
+      longitude: "200",
+    );
   });
   //
 }

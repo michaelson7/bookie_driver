@@ -4,8 +4,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:intl/intl.dart';
 
+import '../../../../model/core/DriverAllTripModels.dart';
+import '../../../../model/core/DriverStatsModel.dart';
+import '../../../../model/core/TripDriverHistory.dart';
 import '../../../../model/core/UserDataModel.dart';
+import '../../../../model/core/dateFilterModel.dart';
+import '../../../../provider/DriverProvider.dart';
 import '../../../../provider/shared_prefrence_provider.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 
@@ -35,7 +41,17 @@ class _DriverDashboardState extends State<DriverDashboard> {
   var registrationProvider = RegistrationProvider();
   UserDataModel? userDataModel;
   _DriverDashboardState(this.profilePhoto);
+  bool showb2c = true,
+      today = true,
+      week = false,
+      month = false,
+      allTime = false;
 
+  DriverAllTripHostory? driverAllTripHostory;
+  DateFilterModel? dateFilterModel;
+  DriverStatsModel? driverStatsModel;
+  TripDriverHistory? tripDriverHistory;
+  var _provider = DriverProvider();
   @override
   void initState() {
     super.initState();
@@ -56,13 +72,21 @@ class _DriverDashboardState extends State<DriverDashboard> {
   }
 
   getData() async {
+    var tempDate = await _provider.dateFilte(filter: "day");
     var data = await registrationProvider.getUserId();
+    var driverAllTripHostoryTemp = await _provider.getDriverTrips();
+    var driverStatsModelTemp = await _provider.getDriverStats();
+    var temp = await _provider.driverSpecificTrips();
     setState(() {
+      dateFilterModel = tempDate;
+      driverAllTripHostory = driverAllTripHostoryTemp;
+      driverStatsModel = driverStatsModelTemp;
+      tripDriverHistory = temp;
       userDataModel = UserDataModel.fromJson(
         data.data!,
       );
-      isLoading = false;
     });
+
     widgetListBottom = [
       tripsTodayBody(),
       walletSection(),
@@ -73,6 +97,9 @@ class _DriverDashboardState extends State<DriverDashboard> {
       moneySection(),
       userDetailsSection(),
     ];
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -181,19 +208,67 @@ class _DriverDashboardState extends State<DriverDashboard> {
           children: [
             timeButtons(
               label: "Today",
-              function: () {},
+              function: () async {
+                var temp = await _provider.dateFilte(filter: "day");
+                setState(() {
+                  dateFilterModel = temp;
+                  today = true;
+                  week = false;
+                  month = false;
+                  allTime = false;
+                  widgetListTop[0] = tripSummary();
+                  widgetListBottom[0] = tripsTodayBody();
+                });
+              },
+              selected: today,
             ),
             timeButtons(
               label: "Week",
-              function: () {},
+              function: () async {
+                var temp = await _provider.dateFilte(filter: "week");
+                setState(() {
+                  dateFilterModel = temp;
+                  today = false;
+                  week = true;
+                  month = false;
+                  allTime = false;
+                  widgetListTop[0] = tripSummary();
+                  widgetListBottom[0] = tripsTodayBody();
+                });
+              },
+              selected: week,
             ),
             timeButtons(
               label: "Month",
-              function: () {},
+              function: () async {
+                var temp = await _provider.dateFilte(filter: "month");
+                setState(() {
+                  dateFilterModel = temp;
+                  today = false;
+                  week = false;
+                  month = true;
+                  allTime = false;
+                  widgetListTop[0] = tripSummary();
+                  widgetListBottom[0] = tripsTodayBody();
+                });
+              },
+              selected: month,
             ),
             timeButtons(
               label: "All Time",
-              function: () {},
+              function: () async {
+                var temp = await _provider.dateFilte(filter: "");
+                setState(() {
+                  dateFilterModel = temp;
+                  today = false;
+                  week = false;
+                  month = false;
+                  allTime = true;
+                  widgetListTop[0] = tripSummary();
+                  widgetListBottom[0] = tripsTodayBody();
+                });
+              },
+              selected: allTime,
             )
           ],
         ),
@@ -202,9 +277,15 @@ class _DriverDashboardState extends State<DriverDashboard> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              tripContainer(title: "Trip", value: "22"),
+              tripContainer(
+                title: "Trips",
+                value: "${driverStatsModel?.totalTrips}",
+              ),
               tripContainer(title: "Online", value: "11 hrs"),
-              tripContainer(title: "Earned", value: "K 5000"),
+              tripContainer(
+                title: "Earned",
+                value: "K ${driverStatsModel?.totalEarnings}",
+              ),
             ],
           ),
         )
@@ -267,13 +348,13 @@ class _DriverDashboardState extends State<DriverDashboard> {
         walletCardsTop(
           imagePath: "assets/images/income.png",
           key: "Income",
-          value: "K3000",
+          value: "K${driverStatsModel?.totalEarnings}",
           color: Color(0xFF00A86B),
         ),
         walletCardsTop(
           imagePath: "assets/images/wallte.png",
           key: "Wallet",
-          value: "K300",
+          value: "K${driverStatsModel?.availableBalance}",
           color: Color(0xFFABABAB),
         ),
       ],
@@ -303,6 +384,9 @@ class _DriverDashboardState extends State<DriverDashboard> {
       );
     }
 
+    DateFormat dateFormat = DateFormat("yyyy-MM-dd");
+    DateTime dateTime =
+        dateFormat.parse(driverStatsModel!.registeredDate!.toString());
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: RoundedContainer(
@@ -317,13 +401,19 @@ class _DriverDashboardState extends State<DriverDashboard> {
                     Text(
                       "${userDataModel?.me?.firstName} ${userDataModel?.me?.lastName}",
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Colors.grey[600],
                       ),
                     ),
-                    userDetail(key: "Department", value: "WPHO Driver"),
-                    userDetail(key: "Joined", value: "Sep 2018"),
+                    userDetail(
+                      key: "Department",
+                      value: "${driverStatsModel?.driverDepartment?.name}",
+                    ),
+                    userDetail(
+                        key: "Joined",
+                        value:
+                            "${dateTime.day}/${dateTime.month}/${dateTime.year}"),
                     userDetail(
                         key: "Experience and Skills",
                         value:
@@ -335,7 +425,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
                 child: CachedNetworkImage(
                   imageUrl: userDataModel!.me!.profilepictureSet!.isNotEmpty
                       ? "${userDataModel!.me!.profilepictureSet!.first.image}"
-                      : " ",
+                      : "",
                   fit: BoxFit.cover,
                   errorWidget: (context, url, error) => Icon(
                     FontAwesome.user_circle,
@@ -354,23 +444,42 @@ class _DriverDashboardState extends State<DriverDashboard> {
 
   /*BOTTOM TABS*/
   Widget tripsTodayBody() {
+    ListView listViewPro() {
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        itemCount: dateFilterModel!.dateFilter!.length,
+        itemBuilder: (context, i) {
+          var dataValue = dateFilterModel!.dateFilter?[i];
+          DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
+          DateTime dateTime =
+              dateFormat.parse(dataValue!.createdDate!.toString());
+          return tripData(
+            time:
+                "${dateTime.hour.toString().padLeft(2, "0")}:${dateTime.minute.toString().padRight(2, "0")}",
+            location: "${dataValue?.start?.name} - ${dataValue?.end?.name}",
+            amount: "${dataValue?.amount}",
+            ratingVal: dataValue!.driverratingsSet!.isNotEmpty
+                ? double.parse(
+                    dataValue!.driverratingsSet!.first.rateLevel.toString(),
+                  )
+                : 0.0,
+          );
+        },
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text("Recent Trips", style: kTextStyleHeader2),
         SizedBox(height: 8),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: 22,
-          itemBuilder: (context, i) {
-            return tripData(
-              time: "7:15",
-              location: "Town Center - Bauleni",
-              amount: "250",
-            );
-          },
-        ),
+        dateFilterModel!.dateFilter != null
+            ? listViewPro()
+            : const Padding(
+                padding: EdgeInsets.all(50),
+                child: Text("No Transactions Recorded", style: kTextStyleWhite),
+              )
       ],
     );
   }
@@ -378,7 +487,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
   Widget walletSection() {
     Widget walletItems({
       required String key,
-      required value,
+      required String value,
       Color? keyColor,
       Color? valueColor,
     }) {
@@ -427,7 +536,10 @@ class _DriverDashboardState extends State<DriverDashboard> {
               value: "4.3",
             ),
             walletItems(
-                key: "Acceptance Rate", value: "92%", valueColor: Colors.green),
+              key: "Acceptance Rate",
+              value: "${driverStatsModel?.tripAcceptanceRate.toString()}",
+              valueColor: Colors.green,
+            ),
           ],
         ),
         SizedBox(height: 15),
@@ -437,11 +549,11 @@ class _DriverDashboardState extends State<DriverDashboard> {
             walletItems(
               key: "Trips Cancelled",
               keyColor: Colors.red,
-              value: "5",
+              value: "${driverStatsModel?.totalTripCanceled.toString()}",
             ),
             walletItems(
               key: "Total Trips",
-              value: "243",
+              value: "${driverStatsModel?.totalTrips.toString()}",
             ),
           ],
         ),
@@ -454,54 +566,70 @@ class _DriverDashboardState extends State<DriverDashboard> {
       children: [
         Row(
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(60)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2,
+            InkWell(
+              onTap: () {
+                setState(() {
+                  showb2c = true;
+                  widgetListBottom[2] = ActivitySection();
+                });
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(60)),
                 ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: kBorderRadiusCircularPro,
-                    color: kAccent,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(
-                      "B2C",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: kBorderRadiusCircularPro,
+                      color: showb2c ? kAccent : Colors.white,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        "B2C",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
             SizedBox(width: 10),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(60)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2,
+            InkWell(
+              onTap: () {
+                setState(() {
+                  showb2c = false;
+                  widgetListBottom[2] = ActivitySection();
+                });
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(60)),
                 ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: kBorderRadiusCircularPro,
-                    color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(
-                      "B2B",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: kBorderRadiusCircularPro,
+                      color: !showb2c ? kAccent : Colors.white,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        "B2B",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
                     ),
                   ),
                 ),
@@ -509,7 +637,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
             ),
             Expanded(
               child: Text(
-                "8h 12m",
+                "",
                 textAlign: TextAlign.end,
                 style: TextStyle(
                   fontSize: 25,
@@ -520,19 +648,55 @@ class _DriverDashboardState extends State<DriverDashboard> {
           ],
         ),
         SizedBox(height: 20),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: 22,
-          itemBuilder: (context, i) {
-            return tripData(
-              time: "7:15",
-              location: "Town Center - Bauleni",
-              amount: "250",
-            );
-          },
-        ),
+        showb2c
+            ? tripDriverHistory!.c2BTrips != null
+                ? listView()
+                : Padding(
+                    padding: const EdgeInsets.all(50),
+                    child: Text("No Transactions Recorded",
+                        style: kTextStyleWhite),
+                  )
+            : tripDriverHistory!.b2BTrips != null
+                ? listView()
+                : Padding(
+                    padding: const EdgeInsets.all(50),
+                    child: Text("No Transactions Recorded",
+                        style: kTextStyleWhite),
+                  )
       ],
+    );
+  }
+
+  ListView listView() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: showb2c
+          ? tripDriverHistory!.c2BTrips != null
+              ? tripDriverHistory!.c2BTrips?.length
+              : 0
+          : tripDriverHistory!.b2BTrips != null
+              ? tripDriverHistory!.b2BTrips?.length
+              : 0,
+      itemBuilder: (context, i) {
+        var dataValue = showb2c
+            ? tripDriverHistory?.c2BTrips![i]
+            : tripDriverHistory!.b2BTrips![i];
+        DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
+        DateTime dateTime =
+            dateFormat.parse(dataValue!.createdDate!.toString());
+        return tripData(
+          time:
+              "${dateTime.hour}:${dateTime.minute.toString().padRight(2, "0")}",
+          location: "${dataValue?.start?.name} - ${dataValue?.end?.name}",
+          amount: "${dataValue?.amount}",
+          ratingVal: dataValue!.driverratingsSet!.isNotEmpty
+              ? double.parse(
+                  dataValue!.driverratingsSet!.first.rateLevel.toString(),
+                )
+              : 0.0,
+        );
+      },
     );
   }
   /*BOTTOM TABS*/
@@ -590,16 +754,18 @@ class _DriverDashboardState extends State<DriverDashboard> {
   ElevatedButton timeButtons({
     required String label,
     required Function function,
+    bool selected = false,
   }) {
     return ElevatedButton(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
+        backgroundColor:
+            MaterialStateProperty.all<Color>(selected ? kAccent : Colors.white),
       ),
       onPressed: () => function(),
       child: Text(
         label,
         style: TextStyle(
-          color: Colors.black,
+          color: selected ? Colors.white : Colors.black,
         ),
       ),
     );
