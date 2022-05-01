@@ -397,6 +397,24 @@ mutation  resetPassword(
 }
 """;
 
+String allMyTrips = """
+query{
+  allMyTrips{
+    start{
+      name
+    }
+    end{
+      name
+    },
+    createdDate,
+    modifiedDate,
+    driverratingsSet{
+      rateLevel
+    }
+  }
+}
+""";
+
 String uploadProfilePicture = """
 mutation  uploadProfilePicture(
   \$user: ID!, 

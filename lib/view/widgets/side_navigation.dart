@@ -55,17 +55,23 @@ Drawer buildDrawer({
                     ),
                   ),
                   SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Hi, $userName", style: kTextStyleHeader1),
-                      Text(
-                        "#Let's get you there",
-                        style: TextStyle(
-                          fontSize: 12,
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Hi, $userName",
+                          style: kTextStyleHeader1.copyWith(fontSize: 15),
                         ),
-                      ),
-                    ],
+                        Text(
+                          "#Let's get you there",
+                          style: TextStyle(
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
                   )
                 ],
               ),

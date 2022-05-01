@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/core/UserModel.dart';
@@ -98,6 +99,7 @@ class SharedPreferenceProvider {
 
   Future<String?> getStringValue(String value) async {
     try {
+      WidgetsFlutterBinding.ensureInitialized();
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? spItem = prefs.getString(value);
       return spItem;

@@ -83,5 +83,10 @@ main() {
     var _provider = DriverProvider();
     var response = await _provider.getCarTypes();
   });
+
+  test('getDriverTrips', () async {
+    var _provider = DriverProvider();
+    var response = await _provider.getDriverTrips();
+  });
   //
 }

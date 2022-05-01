@@ -23,6 +23,16 @@ class DriverProvider {
     return data;
   }
 
+  Future<QueryResult> getDriverTrips() async {
+    var data = await MutationRequest(
+      jsonBody: {
+        "": "",
+      },
+      mutation: allMyTrips,
+    );
+    return data;
+  }
+
   Future<CarTypeModel> getCarTypes() async {
     var response = CarTypeModel();
     var data = await MutationRequest(

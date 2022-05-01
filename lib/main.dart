@@ -6,7 +6,7 @@ import 'view/widgets/GraphQLConfiguration.dart';
 GraphQLConfiguration graphQLConfiguration = GraphQLConfiguration("");
 
 void main() {
-  // WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     GraphQLProvider(
       client: graphQLConfiguration.client,
