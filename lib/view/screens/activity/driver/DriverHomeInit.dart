@@ -130,21 +130,23 @@ class _HomeActivityState extends State<DriverHomeInit>
       await registrationProvider.getUserId();
       var data = await tripProvider.allTripRequests(jsonBody: {"": ""});
       if (data.allRequestTrip!.length > 0) {
-        hasRequest = true;
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DriverAcceptTrip(
-              model: data,
-              profilePhoto: profilePhoto,
+        await Future.delayed(Duration(seconds: 6));
+        if (isOnline) {
+          hasRequest = true;
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DriverAcceptTrip(
+                model: data,
+                profilePhoto: profilePhoto,
+              ),
             ),
-          ),
-        );
-        Navigator.pushReplacementNamed(context, DriverHomeInit.id);
+          );
+          Navigator.pushReplacementNamed(context, DriverHomeInit.id);
+        }
       }
       loggerInfo(message: "PRINTING $num");
       num++;
-      await Future.delayed(Duration(seconds: 6));
     }
   }
 
