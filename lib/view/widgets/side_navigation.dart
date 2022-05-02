@@ -80,8 +80,8 @@ Drawer buildDrawer({
           menuButton(
             title: "Dashboard",
             icon: FontAwesome.dashboard,
-            function: () {
-              Navigator.push(
+            function: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => DriverDashboard(
@@ -101,8 +101,8 @@ Drawer buildDrawer({
           menuButton(
             title: "Profile",
             icon: FontAwesome.user,
-            function: () {
-              Navigator.pushNamed(context, ProfileScreen.id);
+            function: () async {
+              await Navigator.pushNamed(context, ProfileScreen.id);
             },
           ),
           menuButton(
