@@ -9,8 +9,10 @@ class StarRating extends StatelessWidget {
   final double rating;
   final RatingChangeCallback? onRatingChanged;
   final Color color;
+  bool shouldCenter;
 
   StarRating({
+    this.shouldCenter = false,
     this.starCount = 5,
     this.rating = .0,
     required this.onRatingChanged,
@@ -45,6 +47,8 @@ class StarRating extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Row(
+        mainAxisAlignment:
+            shouldCenter ? MainAxisAlignment.center : MainAxisAlignment.start,
         children:
             new List.generate(starCount, (index) => buildStar(context, index)));
   }

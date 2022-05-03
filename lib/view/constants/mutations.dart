@@ -374,7 +374,7 @@ mutation  forgotPassword(
 ){
   forgotPassword(
     data:{
-      email:\$email
+      phoneNumber:\$email
     }
   ){
     response,
@@ -392,7 +392,7 @@ mutation  resetPassword(
 ){ 
   resetPassword(
     data:{
-      email:\$email,
+      phoneNumber:\$email,
       otp:\$otp,
       password1:\$password1,
       password2:\$password2
@@ -433,7 +433,7 @@ query{
       name
     },
     createdDate,
-      amount,
+    amount,
     modifiedDate,
     driverratingsSet{
       rateLevel
@@ -446,6 +446,7 @@ query{
     end{
       name
     },
+    amount,
     createdDate,
     modifiedDate,
     driverratingsSet{

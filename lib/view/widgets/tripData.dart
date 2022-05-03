@@ -37,6 +37,7 @@ Widget tripData({
                 ),
                 bottom: StarRating(
                   rating: ratingVal,
+                  shouldCenter: true,
                   color: Colors.yellow,
                   onRatingChanged: (rating) => loggerInfo(
                     message: rating.toString(),

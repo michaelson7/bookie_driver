@@ -467,12 +467,12 @@ class _HomeActivityState extends State<UnnecessaryScreen> {
               ),
               backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
+            child: const Padding(
+              padding: EdgeInsets.symmetric(
                 horizontal: 30,
                 vertical: 15,
               ),
-              child: Text("Stop"),
+              child: Text("Stop Trip"),
             ),
           ),
           ElevatedButton(

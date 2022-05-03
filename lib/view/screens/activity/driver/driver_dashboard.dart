@@ -46,7 +46,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
       week = false,
       month = false,
       allTime = false;
-
+  Duration? totalTime;
   DriverAllTripHostory? driverAllTripHostory;
   DateFilterModel? dateFilterModel;
   DriverStatsModel? driverStatsModel;
@@ -77,7 +77,15 @@ class _DriverDashboardState extends State<DriverDashboard> {
     var driverAllTripHostoryTemp = await _provider.getDriverTrips();
     var driverStatsModelTemp = await _provider.getDriverStats();
     var temp = await _provider.driverSpecificTrips();
+
+    //hours online
+    int totalTrips = driverStatsModelTemp.totalTrips ?? 0;
+    var math = (totalTrips * 20);
+    var d = Duration(minutes: math.ceil());
+    var totalTimeTemp = d;
+
     setState(() {
+      totalTime = totalTimeTemp;
       dateFilterModel = tempDate;
       driverAllTripHostory = driverAllTripHostoryTemp;
       driverStatsModel = driverStatsModelTemp;
@@ -281,7 +289,12 @@ class _DriverDashboardState extends State<DriverDashboard> {
                 title: "Trips",
                 value: "${driverStatsModel?.totalTrips}",
               ),
-              tripContainer(title: "Online", value: "11 hrs"),
+              tripContainer(
+                title: "Online",
+                value: totalTime!.inHours > 0
+                    ? "${totalTime!.inHours} hrs"
+                    : "${totalTime!.inMinutes} Min",
+              ),
               tripContainer(
                 title: "Earned",
                 value: "K ${driverStatsModel?.totalEarnings}",

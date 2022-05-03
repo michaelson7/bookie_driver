@@ -19,6 +19,7 @@ import '../../../widgets/PopUpDialogs.dart';
 import '../../../widgets/appBar.dart';
 import '../../../widgets/gradientButton.dart';
 import '../../../widgets/logger_widget.dart';
+import '../../../widgets/showModalBottomSheet.dart';
 import '../../../widgets/toast.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -133,7 +134,14 @@ class _HomeActivityState extends State<ProfileScreen> {
               alignment: Alignment.bottomRight,
               child: InkWell(
                 onTap: () async {
-                  await imageSelection(useCamera: false);
+                  openBottomSheet(
+                      context: context,
+                      galleryFunction: () async {
+                        await imageSelection(useCamera: false);
+                      },
+                      captureFunction: () async {
+                        await imageSelection(useCamera: true);
+                      });
                 },
                 child: Container(
                   padding: EdgeInsets.all(10),
@@ -474,7 +482,7 @@ class _HomeActivityState extends State<ProfileScreen> {
     try {
       ImagePicker _picker = ImagePicker();
       XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
+        source: useCamera ? ImageSource.camera : ImageSource.gallery,
       );
       final bytes = File(image!.path).readAsBytesSync();
       if (image != null) {

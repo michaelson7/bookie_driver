@@ -16,6 +16,7 @@ import '../../../../provider/shared_prefrence_provider.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/enum.dart';
 import '../../../widgets/gradientButton.dart';
+import '../../../widgets/showModalBottomSheet.dart';
 import '../../../widgets/toast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -149,13 +150,26 @@ class _HomeActivityState extends State<DriverPicture> {
             ),
             InkWell(
               onTap: () async {
-                var image = await imageSelection(useCamera: false);
-                if (image != null) {
-                  setState(() {
-                    selectedLicenseBack = true;
-                    licenseBackFile = File(image.path);
-                  });
-                }
+                openBottomSheet(
+                    context: context,
+                    galleryFunction: () async {
+                      var image = await imageSelection(useCamera: false);
+                      if (image != null) {
+                        setState(() {
+                          selectedLicenseBack = true;
+                          licenseBackFile = File(image.path);
+                        });
+                      }
+                    },
+                    captureFunction: () async {
+                      var image = await imageSelection(useCamera: true);
+                      if (image != null) {
+                        setState(() {
+                          selectedLicenseBack = true;
+                          licenseBackFile = File(image.path);
+                        });
+                      }
+                    });
               },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +284,7 @@ class _HomeActivityState extends State<DriverPicture> {
     } else {
       //setImage
       var dialog = PopUpDialogs(context: context);
-      dialog.showLoadingAnimation(context: context);
+      dialog.showLoadingAnimation(context: context, message: "Uploading");
       var data = await provider.getUserId();
       var skills = await skillProvider.allSkillsRequest();
       var photoResponse = await setProfilePhoto(provider, data);
@@ -355,7 +369,7 @@ class _HomeActivityState extends State<DriverPicture> {
     try {
       ImagePicker _picker = ImagePicker();
       XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
+        source: useCamera ? ImageSource.camera : ImageSource.gallery,
       );
       return image;
     } catch (e) {

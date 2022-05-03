@@ -2,6 +2,7 @@ import 'package:bookie_driver/model/core/UserModel.dart';
 import 'package:bookie_driver/provider/DriverProvider.dart';
 import 'package:bookie_driver/provider/RegistrationProvider.dart';
 import 'package:bookie_driver/provider/TripProvider.dart';
+import 'package:bookie_driver/view/widgets/logger_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:bookie_driver/main.dart';
@@ -115,6 +116,11 @@ main() {
       latitude: "100",
       longitude: "200",
     );
+  });
+
+  test('testTIme', () async {
+    var d = Duration(minutes: 25);
+    loggerAccent(message: d.inHours.toString());
   });
   //
 }

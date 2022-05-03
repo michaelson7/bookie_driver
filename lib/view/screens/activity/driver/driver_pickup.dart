@@ -118,11 +118,21 @@ class _HomeActivityState extends State<DriverPickUp> {
       originMarker: originMarker!,
     );
     var destinationDistance = tripData!.totalDistance.split(" ")[0];
+    double rate = double.parse(
+      model.vehicleClass!.vehiclebasepriceSet!.first.rate,
+    );
+    double min = double.parse(
+      model.vehicleClass!.vehiclebasepriceSet!.first.price,
+    );
     setState(() {
       //totalTime = "3";
       destinationMarker = destinationResult;
       destinationInformation = tripData;
-      total = double.parse(destinationDistance) * 10;
+      total = double.parse(destinationDistance) * rate;
+      if (total < min) {
+        total = min;
+      }
+      total = double.parse(total.toStringAsFixed(2));
     });
 
     //move to location
@@ -295,22 +305,7 @@ class _HomeActivityState extends State<DriverPickUp> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Expanded(
-                      child: Container(
-                        child: dataValue.type.toString() == "BusinessToBusiness"
-                            ? dataValue.businessrequesttripSet!.isNotEmpty
-                                ? Text(
-                                    "Trip Description:\n${dataValue.businessrequesttripSet?.first.tripDescription}",
-                                    textAlign: TextAlign.left,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                    ),
-                                  )
-                                : const Text("NO TRIP DESCRIPTION")
-                            : SizedBox(height: 0),
-                      ),
-                    ),
+                    Text("ZMW ${total}"),
                     Column(
                       children: [
                         Image.asset(
@@ -325,6 +320,23 @@ class _HomeActivityState extends State<DriverPickUp> {
                       ],
                     )
                   ],
+                ),
+                SizedBox(height: 10),
+                Expanded(
+                  child: Container(
+                    child: dataValue.type.toString() == "BusinessToBusiness"
+                        ? dataValue.businessrequesttripSet!.isNotEmpty
+                            ? Text(
+                                "Trip Description:\n${dataValue.businessrequesttripSet?.first.tripDescription}",
+                                textAlign: TextAlign.left,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              )
+                            : const Text("NO TRIP DESCRIPTION")
+                        : SizedBox(height: 0),
+                  ),
                 ),
                 SizedBox(height: 15),
                 Center(
@@ -397,12 +409,12 @@ class _HomeActivityState extends State<DriverPickUp> {
                 ),
               ),
               backgroundColor:
-                  MaterialStateProperty.all<Color>(Color(0xFFFFD008)),
+                  MaterialStateProperty.all<Color>(const Color(0xFFFFD008)),
             ),
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: Row(
-                children: [
+                children: const [
                   Icon(
                     FontAwesome.phone,
                     color: Colors.green,
@@ -437,13 +449,14 @@ class _HomeActivityState extends State<DriverPickUp> {
               ),
               backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+            child: const Padding(
+              padding: EdgeInsets.all(12),
               child: Center(
-                  child: Text(
-                "Arrived Pickup Location",
-                textAlign: TextAlign.center,
-              )),
+                child: Text(
+                  "Arrived",
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
           ),
         ],
