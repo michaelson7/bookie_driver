@@ -427,6 +427,7 @@ class _HomeActivityState extends State<DriverPickUp> {
                 MaterialPageRoute(
                   builder: (context) => UnnecessaryScreen(
                     model: model,
+                    total: total,
                     acceptTripId: acceptTripId,
                     profilePhoto: profilePhoto,
                   ),

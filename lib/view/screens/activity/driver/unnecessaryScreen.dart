@@ -40,8 +40,10 @@ class UnnecessaryScreen extends StatefulWidget {
   AllRequestTrip model;
   String acceptTripId;
   String profilePhoto;
+  String total;
   UnnecessaryScreen(
       {Key? key,
+      required this.total,
       required this.model,
       required this.acceptTripId,
       required this.profilePhoto})
@@ -49,7 +51,7 @@ class UnnecessaryScreen extends StatefulWidget {
 
   @override
   _HomeActivityState createState() =>
-      _HomeActivityState(model, acceptTripId, profilePhoto);
+      _HomeActivityState(model, acceptTripId, profilePhoto, total);
 }
 
 class _HomeActivityState extends State<UnnecessaryScreen> {
@@ -59,12 +61,13 @@ class _HomeActivityState extends State<UnnecessaryScreen> {
   LocationProvider locationProvider = LocationProvider();
   int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 30;
   bool isDriver = false;
-  var total;
+  String total;
   String profilePhoto;
   String name = "userName";
   AllRequestTrip? allRequestTrip;
   String acceptTripId;
-  _HomeActivityState(this.model, this.acceptTripId, this.profilePhoto);
+  _HomeActivityState(
+      this.model, this.acceptTripId, this.profilePhoto, this.total);
 
   Completer<GoogleMapController> _mapController = Completer();
   Marker? originMarker, destinationMarker;
@@ -133,7 +136,6 @@ class _HomeActivityState extends State<UnnecessaryScreen> {
       //totalTime = "3";
       destinationMarker = destinationResult;
       destinationInformation = tripData;
-      total = double.parse(destinationDistance) * 10;
     });
 
     //move to location
