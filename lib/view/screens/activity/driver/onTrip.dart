@@ -71,9 +71,9 @@ class _HomeActivityState extends State<OnTrip> {
     checkTripType();
 
     _stopWatchTimer.onExecute.add(StopWatchExecute.start);
-    Timer _timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
-      setState(() {});
-    });
+    // Timer _timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
+    //   setState(() {});
+    // });
     setMap();
   }
 
