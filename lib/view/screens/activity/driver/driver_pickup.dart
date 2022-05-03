@@ -24,6 +24,7 @@ import '../../../widgets/directions_repository.dart';
 import '../../../widgets/dragContainerBody.dart';
 import '../../../widgets/gradientContainer.dart';
 import '../../../widgets/makeCall.dart';
+import '../../../widgets/openSMSorCallDialog.dart';
 import '../../../widgets/side_navigation.dart';
 import 'CallScreen.dart';
 import 'onTrip.dart';
@@ -177,15 +178,8 @@ class _HomeActivityState extends State<DriverPickUp> {
         children: [
           Expanded(child: mapBody()),
           dragContainer(),
-          SizedBox(height: 20),
         ],
       ),
-    );
-  }
-
-  Container buildContainer() {
-    return Container(
-      child: mapBody(),
     );
   }
 
@@ -216,40 +210,32 @@ class _HomeActivityState extends State<DriverPickUp> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius:
-                              BorderRadius.all(Radius.elliptical(30, 30)),
-                          child: CachedNetworkImage(
-                            height: 50.0,
-                            width: 50.0,
-                            imageUrl: dataValue
-                                    .user!.profilepictureSet!.isNotEmpty
-                                ? "${dataValue.user?.profilepictureSet!.first.image}"
-                                : " ",
-                            fit: BoxFit.cover,
-                            errorWidget: (context, url, error) => Icon(
-                              FontAwesome.user_circle,
-                              color: Colors.grey[800],
-                              size: 50,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius:
+                                BorderRadius.all(Radius.elliptical(30, 30)),
+                            child: CachedNetworkImage(
+                              height: 50.0,
+                              width: 50.0,
+                              imageUrl: dataValue
+                                      .user!.profilepictureSet!.isNotEmpty
+                                  ? "${dataValue.user?.profilepictureSet!.first.image}"
+                                  : " ",
+                              fit: BoxFit.cover,
+                              errorWidget: (context, url, error) => Icon(
+                                FontAwesome.user_circle,
+                                color: Colors.grey[800],
+                                size: 50,
+                              ),
                             ),
                           ),
-                        ),
-                        Text(
-                            "${dataValue.user?.firstName} ${dataValue.user?.lastName}",
-                            style: TextStyle(color: Colors.white))
-                      ],
-                    ),
-                    Expanded(
-                      child: Text(
-                        "",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+                          Text(
+                              "${dataValue.user?.firstName} ${dataValue.user?.lastName}",
+                              style: TextStyle(color: Colors.white))
+                        ],
                       ),
                     ),
                     Padding(
@@ -305,7 +291,12 @@ class _HomeActivityState extends State<DriverPickUp> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text("ZMW ${total}"),
+                    Expanded(
+                      child: Text(
+                        "ZMW ${total}",
+                        style: kTextStyleWhite,
+                      ),
+                    ),
                     Column(
                       children: [
                         Image.asset(
@@ -322,21 +313,19 @@ class _HomeActivityState extends State<DriverPickUp> {
                   ],
                 ),
                 SizedBox(height: 10),
-                Expanded(
-                  child: Container(
-                    child: dataValue.type.toString() == "BusinessToBusiness"
-                        ? dataValue.businessrequesttripSet!.isNotEmpty
-                            ? Text(
-                                "Trip Description:\n${dataValue.businessrequesttripSet?.first.tripDescription}",
-                                textAlign: TextAlign.left,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              )
-                            : const Text("NO TRIP DESCRIPTION")
-                        : SizedBox(height: 0),
-                  ),
+                Container(
+                  child: dataValue.type.toString() == "BusinessToBusiness"
+                      ? dataValue.businessrequesttripSet!.isNotEmpty
+                          ? Text(
+                              "Trip Description:\n${dataValue.businessrequesttripSet?.first.tripDescription}",
+                              textAlign: TextAlign.left,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                            )
+                          : const Text("NO TRIP DESCRIPTION")
+                      : SizedBox(height: 0),
                 ),
                 SizedBox(height: 15),
                 Center(
@@ -400,7 +389,10 @@ class _HomeActivityState extends State<DriverPickUp> {
         children: [
           ElevatedButton(
             onPressed: () {
-              launchURL(url: "${model.user?.phoneNumber}");
+              openSMSorCallDialog(
+                context: context,
+                phoneNumber: "${model.user?.phoneNumber}",
+              );
             },
             style: ButtonStyle(
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
