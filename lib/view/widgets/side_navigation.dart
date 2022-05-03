@@ -40,17 +40,21 @@ Drawer buildDrawer({
               padding: const EdgeInsets.all(15.0),
               child: Row(
                 children: [
-                  ClipRRect(
-                    borderRadius: kBorderRadiusCircularPro,
-                    child: CachedNetworkImage(
-                      height: 35.0,
-                      width: 35.0,
-                      imageUrl: profilePhoto,
-                      fit: BoxFit.cover,
-                      errorWidget: (context, url, error) => Icon(
-                        FontAwesome.user_circle,
-                        color: Colors.grey[800],
-                        size: 35,
+                  InkWell(
+                    onTap: () {
+                      Navigator.pushNamed(context, ProfileScreen.id);
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.all(Radius.elliptical(30, 30)),
+                      child: CachedNetworkImage(
+                        height: 55.0,
+                        width: 55.0,
+                        imageUrl: profilePhoto,
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) => Icon(
+                          FontAwesome.user_circle,
+                          size: 50,
+                        ),
                       ),
                     ),
                   ),
@@ -62,7 +66,7 @@ Drawer buildDrawer({
                       children: [
                         Text(
                           "Hi, $userName",
-                          style: kTextStyleHeader1.copyWith(fontSize: 15),
+                          style: kTextStyleHeader1.copyWith(fontSize: 17),
                         ),
                         Text(
                           "#Let's get you there",

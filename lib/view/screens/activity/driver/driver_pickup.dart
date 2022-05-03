@@ -178,6 +178,7 @@ class _HomeActivityState extends State<DriverPickUp> {
         children: [
           Expanded(child: mapBody()),
           dragContainer(),
+          SizedBox(height: 20),
         ],
       ),
     );
@@ -427,7 +428,7 @@ class _HomeActivityState extends State<DriverPickUp> {
                 MaterialPageRoute(
                   builder: (context) => UnnecessaryScreen(
                     model: model,
-                    total: total,
+                    total: total.toString(),
                     acceptTripId: acceptTripId,
                     profilePhoto: profilePhoto,
                   ),
