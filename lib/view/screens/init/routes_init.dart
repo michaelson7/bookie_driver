@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bookie_driver/view/screens/activity/driver/CallScreen.dart';
 import 'package:bookie_driver/view/screens/activity/driver/DriverHomeInit.dart';
 import 'package:bookie_driver/view/screens/activity/driver/BusinessRegistration.dart';
@@ -13,10 +15,14 @@ import 'package:bookie_driver/view/screens/activity/setup/introduction_screen.da
 import 'package:bookie_driver/view/screens/activity/setup/login_activity.dart';
 import 'package:bookie_driver/view/screens/activity/setup/password_reset.dart';
 import 'package:bookie_driver/view/screens/activity/setup/registration_activity.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../main.dart';
+import '../../../model/service/NotificationService.dart';
 import '../../../provider/shared_prefrence_provider.dart';
 import '../../constants/constants.dart';
+import '../../widgets/logger_widget.dart';
 import '../activity/driver/driverPasswordReset.dart';
 import '../activity/driver/driver_picture.dart';
 import '../activity/driver/profileScreen.dart';
@@ -56,6 +62,7 @@ class _RoutesInitState extends State<RoutesInit> {
         ? Center(child: CircularProgressIndicator())
         : MaterialApp(
             title: 'Bookie',
+            navigatorKey: navigatorKey,
             theme: buildThemeData(),
             //banner
             debugShowCheckedModeBanner: false,

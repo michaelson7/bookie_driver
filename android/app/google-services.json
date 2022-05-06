@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "124389104920",
+    "project_id": "bookie-2920a",
+    "storage_bucket": "bookie-2920a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:124389104920:android:7d373b614c3bb456ca126d",
+        "android_client_info": {
+          "package_name": "com.example.bookie"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "124389104920-qcu31uuqm7r2per9tpvggojl7eukhrf7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWx1e4BF2FqCAv5QCVA6VYepEcLDV1ZeM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "124389104920-qcu31uuqm7r2per9tpvggojl7eukhrf7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:124389104920:android:bd5f28e490126f31ca126d",
+        "android_client_info": {
+          "package_name": "com.example.bookie_driver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "124389104920-qcu31uuqm7r2per9tpvggojl7eukhrf7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWx1e4BF2FqCAv5QCVA6VYepEcLDV1ZeM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "124389104920-qcu31uuqm7r2per9tpvggojl7eukhrf7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -13,6 +13,7 @@ import 'package:bookie_driver/view/widgets/gradientButton.dart';
 import 'package:bookie_driver/view/widgets/logger_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:draggable_bottom_sheet/draggable_bottom_sheet.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -20,6 +21,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
+import '../../../../model/service/setFireBase.dart';
 import '../../../constants/enum.dart';
 import '../../../widgets/SpritePainter.dart';
 import '../../../widgets/directions_repository.dart';
@@ -65,10 +67,9 @@ class _HomeActivityState extends State<DriverHomeInit>
     _controller = AnimationController(
       vsync: this,
     );
+    setFireBase();
     getUserData();
-    _startAnimation();
-    checkTripType();
-    UpdateDriverLocation();
+
     super.initState();
   }
 
@@ -80,8 +81,13 @@ class _HomeActivityState extends State<DriverHomeInit>
       setState(() {
         isOnline = isOnlineTemp;
       });
-      await customerSearch();
+      if (isOnline) {
+        await customerSearch();
+      }
     }
+    _startAnimation();
+    await checkTripType();
+    await UpdateDriverLocation();
   }
 
   Future<void> checkTripType() async {
@@ -94,6 +100,19 @@ class _HomeActivityState extends State<DriverHomeInit>
   }
 
   UpdateDriverLocation() async {
+    //FIREBASE
+    var _spProvider = SharedPreferenceProvider();
+    var number = await _spProvider.getStringValue(
+      getEnumValue(UserDetails.number),
+    );
+    try {
+      await FirebaseMessaging.instance.subscribeToTopic("driver-${number}");
+      await FirebaseMessaging.instance.subscribeToTopic("ALL-Drivers");
+      loggerAccent(message: "TOPIC SUBSCRIPTION: $number");
+    } on Exception catch (e) {
+      loggerError(message: "ERROR WHILE TOPIC SUBSCRIPTION ${e}");
+    }
+
     setState(() => isLoading = true);
     var sp = SharedPreferenceProvider();
     var photo = await sp.getStringValue(getEnumValue(UserDetails.userPhoto));
