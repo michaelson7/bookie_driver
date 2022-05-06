@@ -9,6 +9,8 @@ import 'package:bookie_driver/provider/TripProvider.dart';
 import 'package:bookie_driver/provider/location_provider.dart';
 import 'package:bookie_driver/provider/shared_prefrence_provider.dart';
 import 'package:bookie_driver/view/constants/constants.dart';
+import 'package:bookie_driver/view/screens/activity/driver/DriverWallet.dart';
+import 'package:bookie_driver/view/screens/activity/driver/vechileDetails.dart';
 import 'package:bookie_driver/view/widgets/gradientButton.dart';
 import 'package:bookie_driver/view/widgets/logger_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -145,27 +147,38 @@ class _HomeActivityState extends State<DriverHomeInit>
 
   Future<void> customerSearch() async {
     int num = 0;
-    while (!hasRequest) {
-      await registrationProvider.getUserId();
-      var data = await tripProvider.allTripRequests(jsonBody: {"": ""});
-      if (data.allRequestTrip!.length > 0) {
-        await Future.delayed(Duration(seconds: 6));
-        if (isOnline) {
-          hasRequest = true;
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DriverAcceptTrip(
-                model: data,
-                profilePhoto: profilePhoto,
+    var driverProvider = DriverProvider();
+    var data = await driverProvider.getDriverStats();
+    if (double.parse(data.availableBalance ?? "0") > 50) {
+      while (!hasRequest) {
+        await registrationProvider.getUserId();
+        var data = await tripProvider.allTripRequests(jsonBody: {"": ""});
+        if (data.allRequestTrip!.length > 0) {
+          await Future.delayed(Duration(seconds: 6));
+          if (isOnline) {
+            hasRequest = true;
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DriverAcceptTrip(
+                  model: data,
+                  profilePhoto: profilePhoto,
+                ),
               ),
-            ),
-          );
-          Navigator.pushReplacementNamed(context, DriverHomeInit.id);
+            );
+            Navigator.pushReplacementNamed(context, DriverHomeInit.id);
+          } else {
+            hasRequest = true;
+          }
         }
+        loggerInfo(message: "PRINTING $num");
+        num++;
       }
-      loggerInfo(message: "PRINTING $num");
-      num++;
+    } else {
+      setState(() {
+        isOnline = false;
+      });
+      openErrorWalletDialog();
     }
   }
 
@@ -306,13 +319,37 @@ class _HomeActivityState extends State<DriverHomeInit>
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                  await _sp.setBool(key: "isOnline", value: true);
-                  setState(() {
-                    loadingText = "Waiting for Trip Request";
-                    isOnline = true;
-                    size = 200;
-                  });
-                  await customerSearch();
+                  //check if has vechile
+                  var hasVehicle = await _sp.getBoolValue("hasVehicle");
+                  if (hasVehicle ?? false) {
+                    await _sp.setBool(key: "isOnline", value: true);
+                    setState(() {
+                      loadingText = "Waiting for Trip Request";
+                      isOnline = true;
+                      size = 200;
+                    });
+                    await customerSearch();
+                  } else {
+                    //check if vechile is registered
+                    var data = await registrationProvider.getUserId();
+                    var userDataModel = UserDataModel.fromJson(
+                      data.data!,
+                    );
+                    if (userDataModel!
+                        .me!.driverSet!.first.drivervehicleSet!.isEmpty) {
+                      await _sp.setBool(key: "hasVehicle", value: false);
+                      openErrorDialog();
+                    } else {
+                      await _sp.setBool(key: "hasVehicle", value: true);
+                      await _sp.setBool(key: "isOnline", value: true);
+                      setState(() {
+                        loadingText = "Waiting for Trip Request";
+                        isOnline = true;
+                        size = 200;
+                      });
+                      await customerSearch();
+                    }
+                  }
                 },
                 style: ButtonStyle(
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -347,11 +384,44 @@ class _HomeActivityState extends State<DriverHomeInit>
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                  await _sp.setBool(key: "isOnline", value: false);
-                  setState(() {
-                    isOnline = false;
-                    size = 200;
-                  });
+                  Widget cancelButton = TextButton(
+                    child: Text("Cancel"),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  );
+                  Widget continueButton = TextButton(
+                    child: Text("Proceed"),
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      await _sp.setBool(key: "isOnline", value: false);
+                      setState(() {
+                        isOnline = false;
+                        size = 200;
+                      });
+                    },
+                  );
+                  AlertDialog alert = AlertDialog(
+                    title: const Text(
+                      "Go Offline",
+                      style: TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                    content: const Text(
+                      "Are you sure you want to be offline? You will not recive trip requests in this state",
+                    ),
+                    actions: [
+                      cancelButton,
+                      continueButton,
+                    ],
+                  );
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return alert;
+                    },
+                  );
                 },
                 style: ButtonStyle(
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -371,5 +441,194 @@ class _HomeActivityState extends State<DriverHomeInit>
         ],
       ),
     );
+  }
+
+  void openErrorDialog() {
+    var width = MediaQuery.of(context).size.width;
+    showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.red,
+            contentPadding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            content: Container(
+              width: width,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: 120,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(10),
+                          topLeft: Radius.circular(10),
+                        ),
+                      ),
+                      child: const Center(
+                        child: Icon(FontAwesome.close),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: kBorderRadiusCircular,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Missing Vehicle Details',
+                            style: kTextStyleHeader2,
+                          ),
+                          SizedBox(height: 4),
+                          const Text(
+                            "Please add vehicle details to receive trip requests",
+                            style: kTextStyleHint,
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    Navigator.pushNamed(
+                                      context,
+                                      VechileDetails.id,
+                                    );
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: kAccent,
+                                      borderRadius: kBorderRadiusCircularPro,
+                                    ),
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "Add Vehicle Details",
+                                        textAlign: TextAlign.center,
+                                        style: kTextStyleWhite,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  void openErrorWalletDialog() {
+    var width = MediaQuery.of(context).size.width;
+    showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.red,
+            contentPadding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            content: Container(
+              width: width,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: 120,
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(10),
+                          topLeft: Radius.circular(10),
+                        ),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.account_balance_wallet,
+                          size: 25,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: kBorderRadiusCircular,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Low Wallet Balance',
+                            style: kTextStyleHeader2,
+                          ),
+                          SizedBox(height: 4),
+                          const Text(
+                            "You have insufficient balance in your wallet to accept trip requests",
+                            style: kTextStyleHint,
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    Navigator.pushNamed(
+                                      context,
+                                      DriverWallet.id,
+                                    );
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: kAccent,
+                                      borderRadius: kBorderRadiusCircularPro,
+                                    ),
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "Deposit Funds",
+                                        textAlign: TextAlign.center,
+                                        style: kTextStyleWhite,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
   }
 }

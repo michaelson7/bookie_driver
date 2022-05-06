@@ -30,6 +30,7 @@ class DateFilter {
     this.start,
     this.end,
     this.amount,
+    required this.type,
     this.createdDate,
     this.modifiedDate,
     this.driverratingsSet,
@@ -37,6 +38,7 @@ class DateFilter {
 
   String? typename;
   End? start;
+  String type;
   End? end;
   String? amount;
   DateTime? createdDate;
@@ -45,6 +47,7 @@ class DateFilter {
 
   factory DateFilter.fromJson(Map<String, dynamic> json) => DateFilter(
         typename: json["__typename"] == null ? null : json["__typename"],
+        type: json["type"] == null ? null : json["type"],
         amount: json["amount"] == null ? null : json["amount"],
         start: json["start"] == null ? null : End.fromJson(json["start"]),
         end: json["end"] == null ? null : End.fromJson(json["end"]),

@@ -33,6 +33,7 @@ import '../../../widgets/dragContainerBody.dart';
 import '../../../widgets/gradientContainer.dart';
 import '../../../widgets/logger_widget.dart';
 import '../../../widgets/side_navigation.dart';
+import '../../../widgets/vechileImageFetcher.dart';
 import 'driver_pickup.dart';
 
 class DriverAcceptTrip extends StatefulWidget {
@@ -465,7 +466,9 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
                     Column(
                       children: [
                         Image.asset(
-                          "assets/images/car.png",
+                          getVechileImage(
+                                  carType: "${dataValue.vehicleClass?.name}") ??
+                              "assets/images/car.png",
                           height: 30,
                         ),
                         Text(

@@ -471,7 +471,9 @@ class _DriverDashboardState extends State<DriverDashboard> {
             time:
                 "${dateTime.hour.toString().padLeft(2, "0")}:${dateTime.minute.toString().padRight(2, "0")}",
             location: "${dataValue?.start?.name} - ${dataValue?.end?.name}",
-            amount: "${dataValue?.amount}",
+            amount: dataValue.type == "CustomerToBusiness"
+                ? "${dataValue?.amount}"
+                : "-",
             ratingVal: dataValue!.driverratingsSet!.isNotEmpty
                 ? double.parse(
                     dataValue!.driverratingsSet!.first.rateLevel.toString(),
@@ -702,7 +704,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
           time:
               "${dateTime.hour}:${dateTime.minute.toString().padRight(2, "0")}",
           location: "${dataValue?.start?.name} - ${dataValue?.end?.name}",
-          amount: "${dataValue?.amount}",
+          amount: !showb2c ? "-" : "${dataValue?.amount}",
           ratingVal: dataValue!.driverratingsSet!.isNotEmpty
               ? double.parse(
                   dataValue!.driverratingsSet!.first.rateLevel.toString(),

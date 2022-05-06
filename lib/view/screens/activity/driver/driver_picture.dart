@@ -4,6 +4,7 @@ import 'package:bookie_driver/model/core/UploadPhotoResponse.dart';
 import 'package:bookie_driver/model/core/driverResponseModel.dart';
 import 'package:bookie_driver/model/core/forgotPasswordResponse.dart';
 import 'package:bookie_driver/provider/SkillsProvider.dart';
+import 'package:bookie_driver/view/screens/activity/driver/DriverHomeInit.dart';
 import 'package:bookie_driver/view/screens/activity/driver/vechileDetails.dart';
 import 'package:bookie_driver/view/widgets/PopUpDialogs.dart';
 import 'package:bookie_driver/view/widgets/logger_widget.dart';
@@ -16,6 +17,7 @@ import '../../../../provider/shared_prefrence_provider.dart';
 import '../../../constants/constants.dart';
 import '../../../constants/enum.dart';
 import '../../../widgets/gradientButton.dart';
+import '../../../widgets/showImage.dart';
 import '../../../widgets/showModalBottomSheet.dart';
 import '../../../widgets/toast.dart';
 import 'package:http/http.dart' as http;
@@ -122,13 +124,26 @@ class _HomeActivityState extends State<DriverPicture> {
             SizedBox(height: 20),
             InkWell(
               onTap: () async {
-                var image = await imageSelection(useCamera: false);
-                if (image != null) {
-                  setState(() {
-                    selectedLicenceFront = true;
-                    licenceFontFile = File(image.path);
-                  });
-                }
+                openBottomSheet(
+                    context: context,
+                    galleryFunction: () async {
+                      var image = await imageSelection(useCamera: false);
+                      if (image != null) {
+                        setState(() {
+                          selectedLicenceFront = true;
+                          licenceFontFile = File(image.path);
+                        });
+                      }
+                    },
+                    captureFunction: () async {
+                      var image = await imageSelection(useCamera: true);
+                      if (image != null) {
+                        setState(() {
+                          selectedLicenceFront = true;
+                          licenceFontFile = File(image.path);
+                        });
+                      }
+                    });
               },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,7 +156,10 @@ class _HomeActivityState extends State<DriverPicture> {
                   selectedLicenceFront
                       ? ElevatedButton(
                           onPressed: () {
-                            showImage(licenceFontFile!);
+                            showImage(
+                              file: licenceFontFile!,
+                              context: context,
+                            );
                           },
                           child: const Text("Preview"))
                       : const SizedBox()
@@ -182,7 +200,10 @@ class _HomeActivityState extends State<DriverPicture> {
                   selectedLicenseBack
                       ? ElevatedButton(
                           onPressed: () {
-                            showImage(licenseBackFile!);
+                            showImage(
+                              file: licenseBackFile!,
+                              context: context,
+                            );
                           },
                           child: const Text("Preview"),
                         )
@@ -293,7 +314,7 @@ class _HomeActivityState extends State<DriverPicture> {
         dialog.closeDialog();
         loggerAccent(message: driverResponse.toJson().toString());
         if (driverResponse.createDriver!.response == 200) {
-          Navigator.popAndPushNamed(context, VechileDetails.id);
+          Navigator.popAndPushNamed(context, DriverHomeInit.id);
         } else {
           toastMessage(
             context: context,
@@ -375,22 +396,5 @@ class _HomeActivityState extends State<DriverPicture> {
     } catch (e) {
       toastMessage(context: context, message: e.toString());
     }
-  }
-
-  showImage(File licenceFontFile) {
-    showDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: kAccent,
-            contentPadding: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            content: Container(
-              child: Image.file(licenceFontFile),
-            ),
-          );
-        });
   }
 }

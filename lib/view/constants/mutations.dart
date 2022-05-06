@@ -504,6 +504,7 @@ query uploadProfilePicture(
     end{
       name
     },
+    type,
     createdDate,
     modifiedDate,
     amount,
@@ -511,9 +512,7 @@ query uploadProfilePicture(
       rateLevel
     }
 	}
-}
-
- 
+} 
 """;
 
 String updateAccount = """

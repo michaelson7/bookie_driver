@@ -50,10 +50,18 @@ main() {
     await _provider.getUserId();
   });
 
+  test('depositFunds', () async {
+    var _provider = DriverProvider();
+    await _provider.depositDriverFunds(
+      driverId: "3",
+      amount: "2000",
+    );
+  });
+
   test('driverAcceptTrip', () async {
     TripProvider _provider = TripProvider();
     var response = await _provider.driverAcceptTrip(
-      driverId: "9",
+      driverId: "3",
       requestTripId: "126",
     );
   });

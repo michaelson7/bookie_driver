@@ -1,3 +1,4 @@
+import 'package:bookie_driver/view/screens/activity/driver/DriverWallet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -107,6 +108,13 @@ Drawer buildDrawer({
             icon: FontAwesome.user,
             function: () async {
               await Navigator.pushNamed(context, ProfileScreen.id);
+            },
+          ),
+          menuButton(
+            title: "Wallet",
+            icon: Icons.account_balance_wallet,
+            function: () async {
+              await Navigator.pushNamed(context, DriverWallet.id);
             },
           ),
           menuButton(

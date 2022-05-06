@@ -7,6 +7,7 @@ import 'package:bookie_driver/view/constants/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../model/core/carTypeModel.dart';
 import '../../../../provider/DriverProvider.dart';
 import '../../../../provider/shared_prefrence_provider.dart';
@@ -14,6 +15,8 @@ import '../../../constants/enum.dart';
 import '../../../widgets/PopUpDialogs.dart';
 import '../../../widgets/gradientButton.dart';
 import '../../../widgets/logger_widget.dart';
+import '../../../widgets/showImage.dart';
+import '../../../widgets/showModalBottomSheet.dart';
 import '../../../widgets/toast.dart';
 import 'BusinessRegistration.dart';
 import 'driverOTP.dart';
@@ -205,26 +208,54 @@ class _HomeActivityState extends State<VechileDetails> {
               ),
               InkWell(
                 onTap: () async {
-                  var image = await imageSelection(useCamera: false);
-                  if (image != null) {
-                    setState(() {
-                      selectedImage = true;
-                      profileFile = File(image.path);
-                    });
-                  }
+                  openBottomSheet(
+                      context: context,
+                      galleryFunction: () async {
+                        var image = await imageSelection(useCamera: true);
+                        if (image != null) {
+                          setState(() {
+                            selectedImage = true;
+                            profileFile = File(image.path);
+                          });
+                        }
+                      },
+                      captureFunction: () async {
+                        var image = await imageSelection(useCamera: true);
+                        if (image != null) {
+                          setState(() {
+                            selectedImage = true;
+                            profileFile = File(image.path);
+                          });
+                        }
+                      });
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: kBorderRadiusCircular,
-                    color: Colors.white,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Image.asset(
-                      "assets/images/addImage.png",
-                      height: 40.0,
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: kBorderRadiusCircular,
+                        color: Colors.white,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.asset(
+                          "assets/images/addImage.png",
+                          height: 40.0,
+                        ),
+                      ),
                     ),
-                  ),
+                    SizedBox(width: 20),
+                    selectedImage
+                        ? ElevatedButton(
+                            onPressed: () {
+                              showImage(
+                                file: profileFile!,
+                                context: context,
+                              );
+                            },
+                            child: const Text("Preview"))
+                        : const SizedBox()
+                  ],
                 ),
               ),
               Padding(
@@ -350,6 +381,8 @@ class _HomeActivityState extends State<VechileDetails> {
 
           dialogs.closeDialog();
           if (carResponse["response"] == 200) {
+            SharedPreferenceProvider _sp = SharedPreferenceProvider();
+            await _sp.setBool(key: "hasVehicle", value: true);
             Navigator.popAndPushNamed(
               context,
               DriverHomeInit.id,
@@ -373,7 +406,7 @@ class _HomeActivityState extends State<VechileDetails> {
     try {
       ImagePicker _picker = ImagePicker();
       XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
+        source: useCamera ? ImageSource.camera : ImageSource.gallery,
       );
       return image;
     } catch (e) {

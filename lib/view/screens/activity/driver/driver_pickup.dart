@@ -26,6 +26,7 @@ import '../../../widgets/gradientContainer.dart';
 import '../../../widgets/makeCall.dart';
 import '../../../widgets/openSMSorCallDialog.dart';
 import '../../../widgets/side_navigation.dart';
+import '../../../widgets/vechileImageFetcher.dart';
 import 'CallScreen.dart';
 import 'onTrip.dart';
 
@@ -301,7 +302,9 @@ class _HomeActivityState extends State<DriverPickUp> {
                     Column(
                       children: [
                         Image.asset(
-                          "assets/images/car.png",
+                          getVechileImage(
+                                  carType: "${dataValue.vehicleClass?.name}") ??
+                              "assets/images/car.png",
                           height: 30,
                         ),
                         Text(

@@ -31,6 +31,7 @@ import '../../../widgets/dragContainerBody.dart';
 import '../../../widgets/gradientContainer.dart';
 import '../../../widgets/logger_widget.dart';
 import '../../../widgets/side_navigation.dart';
+import '../../../widgets/vechileImageFetcher.dart';
 import 'DriverHomeInit.dart';
 import 'driver_pickup.dart';
 import 'onTrip.dart';
@@ -398,7 +399,9 @@ class _HomeActivityState extends State<UnnecessaryScreen> {
                     Column(
                       children: [
                         Image.asset(
-                          "assets/images/car.png",
+                          getVechileImage(
+                                  carType: "${dataValue.vehicleClass?.name}") ??
+                              "assets/images/car.png",
                           height: 30,
                         ),
                         Text(

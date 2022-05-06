@@ -41,6 +41,24 @@ class DriverProvider {
     return response;
   }
 
+  Future<DriverAllTripHostory> depositDriverFunds({
+    required driverId,
+    required amount,
+  }) async {
+    var response = DriverAllTripHostory();
+    var data = await MutationRequest(
+      jsonBody: {
+        "driver": driverId,
+        "amount": amount,
+      },
+      mutation: depositMoney,
+    );
+    if (!data.hasException) {
+      //response = DriverAllTripHostory.fromJson(data.data!);
+    }
+    return response;
+  }
+
   Future<DriverStatsModel> getDriverStats() async {
     var response = DriverStatsModel();
     var data = await MutationRequest(

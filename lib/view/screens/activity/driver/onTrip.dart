@@ -27,6 +27,7 @@ import '../../../widgets/directions_repository.dart';
 import '../../../widgets/dragContainerBody.dart';
 import '../../../widgets/gradientContainer.dart';
 import '../../../widgets/side_navigation.dart';
+import '../../../widgets/vechileImageFetcher.dart';
 
 class OnTrip extends StatefulWidget {
   static String id = "OnTrip";
@@ -329,7 +330,9 @@ class _HomeActivityState extends State<OnTrip> {
                       child: Column(
                         children: [
                           Image.asset(
-                            "assets/images/car.png",
+                            getVechileImage(
+                                carType: "${dataValue.vehicleClass?.name}") ??
+                                "assets/images/car.png",
                             height: 30,
                           ),
                           Text(
