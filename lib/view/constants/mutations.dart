@@ -493,6 +493,18 @@ mutation  uploadProfilePicture(
 }
 """;
 
+String driverArrived = """
+mutation  driverArrived(
+  \$requestTripId: ID!,   
+){
+  driverArrived(
+    requestTripId:\$requestTripId
+  ){
+    success,
+  }
+}
+""";
+
 String dateFilter = """
 query uploadProfilePicture(
   \$filter: String!, 

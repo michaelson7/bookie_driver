@@ -124,7 +124,25 @@ class _DriverDashboardState extends State<DriverDashboard> {
       body: SafeArea(
         child: isLoading
             ? const Center(child: CircularProgressIndicator())
-            : buildContainer(),
+            : Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0xFFAD29DA),
+                          Color(0xFFAD29DA),
+                          Color(0xFFAD29DA),
+                          Color(0xFFD348AE)
+                        ],
+                      ),
+                    ),
+                  ),
+                  SafeArea(child: buildContainer())
+                ],
+              ),
       ),
     );
   }

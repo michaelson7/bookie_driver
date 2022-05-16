@@ -19,6 +19,7 @@ import '../../../widgets/PopUpDialogs.dart';
 import '../../../widgets/appBar.dart';
 import '../../../widgets/gradientButton.dart';
 import '../../../widgets/logger_widget.dart';
+import '../../../widgets/showImage.dart';
 import '../../../widgets/showModalBottomSheet.dart';
 import '../../../widgets/toast.dart';
 
@@ -129,57 +130,70 @@ class _HomeActivityState extends State<ProfileScreen> {
       children: [
         SizedBox(height: 25),
         Center(
-          child: Container(
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: InkWell(
-                onTap: () async {
-                  openBottomSheet(
+          child: InkWell(
+            onTap: () {
+              selectedImage
+                  ? showImage(
+                      file: Photo!,
                       context: context,
-                      galleryFunction: () async {
-                        await imageSelection(useCamera: false);
-                      },
-                      captureFunction: () async {
-                        await imageSelection(useCamera: true);
-                      });
-                },
-                child: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Icon(
-                    Icons.camera_alt,
-                    color: Colors.grey,
+                    )
+                  : showNetworkImage(
+                      context: context,
+                      image: imagePath,
+                    );
+            },
+            child: Container(
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: InkWell(
+                  onTap: () async {
+                    openBottomSheet(
+                        context: context,
+                        galleryFunction: () async {
+                          await imageSelection(useCamera: false);
+                        },
+                        captureFunction: () async {
+                          await imageSelection(useCamera: true);
+                        });
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8)),
+                    child: Icon(
+                      Icons.camera_alt,
+                      color: Colors.grey,
+                    ),
                   ),
                 ),
               ),
-            ),
-            height: 150,
-            width: 150,
-            decoration: BoxDecoration(
-              color: Colors.white60,
-              borderRadius: BorderRadius.circular(100),
-              image: selectedImage
-                  ? DecorationImage(
-                      image: FileImage(Photo!),
-                      fit: BoxFit.cover,
-                    )
-                  : DecorationImage(
-                      fit: BoxFit.cover,
-                      image: Image.network(
-                        imagePath,
+              height: 150,
+              width: 150,
+              decoration: BoxDecoration(
+                color: Colors.white60,
+                borderRadius: BorderRadius.circular(100),
+                image: selectedImage
+                    ? DecorationImage(
+                        image: FileImage(Photo!),
                         fit: BoxFit.cover,
-                      ).image,
-                    ),
+                      )
+                    : DecorationImage(
+                        fit: BoxFit.cover,
+                        image: Image.network(
+                          imagePath,
+                          fit: BoxFit.cover,
+                        ).image,
+                      ),
+              ),
             ),
           ),
         ),
-        Center(
+        const Center(
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8.0),
             child: Text(
-              "Update profile picture",
+              "Update Details",
               style: kTextStyleWhite,
               textAlign: TextAlign.center,
             ),

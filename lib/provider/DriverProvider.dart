@@ -73,6 +73,22 @@ class DriverProvider {
     return response;
   }
 
+  Future<QueryResult> driverArrivedAtDestination({
+    required requestTripId,
+  }) async {
+    var response = DriverStatsModel();
+    var data = await MutationRequest(
+      jsonBody: {
+        "requestTripId": requestTripId,
+      },
+      mutation: driverArrived,
+    );
+    if (!data.hasException) {
+      //response = DriverStatsModel.fromJson(data.data!);
+    }
+    return data;
+  }
+
   Future<CarTypeModel> getCarTypes() async {
     var response = CarTypeModel();
     var data = await MutationRequest(

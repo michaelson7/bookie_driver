@@ -211,7 +211,7 @@ class _HomeActivityState extends State<VechileDetails> {
                   openBottomSheet(
                       context: context,
                       galleryFunction: () async {
-                        var image = await imageSelection(useCamera: true);
+                        var image = await imageSelection(useCamera: false);
                         if (image != null) {
                           setState(() {
                             selectedImage = true;
@@ -347,6 +347,16 @@ class _HomeActivityState extends State<VechileDetails> {
   Future<void> submitData() async {
     if (selectedImage) {
       if (_formKey.currentState!.validate()) {
+        final alphanumeric = RegExp(r'^[a-zA-Z0-9]$');
+        var result = alphanumeric.hasMatch(_plateController.text);
+        loggerAccent(message: "RESULT : $result");
+        if (result) {
+          toastMessage(
+              context: context,
+              message: "Number plate must be in the correct format");
+          return;
+        }
+
         RegistrationProvider provider = RegistrationProvider();
         DriverProvider driverProvider = DriverProvider();
         PopUpDialogs dialogs = PopUpDialogs(context: context);

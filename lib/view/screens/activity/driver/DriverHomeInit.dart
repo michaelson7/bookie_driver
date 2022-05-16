@@ -78,18 +78,16 @@ class _HomeActivityState extends State<DriverHomeInit>
   getUserData() async {
     name = (await _sp.getStringValue(getEnumValue(UserDetails.userName)))!;
     var isOnlineTemp = await _sp.getBoolValue("isOnline");
-
-    if (isOnlineTemp != null) {
-      setState(() {
-        isOnline = isOnlineTemp;
-      });
-      if (isOnline) {
-        await customerSearch();
-      }
-    }
+    setState(() {
+      isOnline = isOnlineTemp ?? false;
+    });
     _startAnimation();
     await checkTripType();
     await UpdateDriverLocation();
+
+    if (isOnline) {
+      await customerSearch();
+    }
   }
 
   Future<void> checkTripType() async {
@@ -151,10 +149,10 @@ class _HomeActivityState extends State<DriverHomeInit>
     var data = await driverProvider.getDriverStats();
     if (double.parse(data.availableBalance ?? "0") > 50) {
       while (!hasRequest) {
+        await Future.delayed(Duration(seconds: 5));
         await registrationProvider.getUserId();
         var data = await tripProvider.allTripRequests(jsonBody: {"": ""});
         if (data.allRequestTrip!.length > 0) {
-          await Future.delayed(Duration(seconds: 6));
           if (isOnline) {
             hasRequest = true;
             await Navigator.push(
@@ -171,6 +169,9 @@ class _HomeActivityState extends State<DriverHomeInit>
             hasRequest = true;
           }
         }
+        // if (!isOnline) {
+        //   hasRequest = true;
+        // }
         loggerInfo(message: "PRINTING $num");
         num++;
       }

@@ -84,10 +84,11 @@ class _HomeActivityState extends State<RegistrationActivity> {
           child: Column(
             children: [
               materialTextField(
-                  controller: _fullNameController,
-                  icon: FontAwesome.user,
-                  hintText: "Full Name",
-                  errorMessage: "Please enter full names"),
+                controller: _fullNameController,
+                icon: FontAwesome.user,
+                hintText: "Full Name",
+                errorMessage: "Please enter full names",
+              ),
               Divider(color: Colors.grey),
               materialTextField(
                 icon: Icons.email,

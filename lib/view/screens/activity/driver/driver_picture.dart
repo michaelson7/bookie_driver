@@ -101,7 +101,7 @@ class _HomeActivityState extends State<DriverPicture> {
               height: MediaQuery.of(context).size.width - 220,
               width: MediaQuery.of(context).size.width - 220,
               decoration: BoxDecoration(
-                color: Colors.white60,
+                //    color: Colors.white60,
                 borderRadius: BorderRadius.circular(100),
                 image: selectedImage
                     ? DecorationImage(
@@ -111,7 +111,7 @@ class _HomeActivityState extends State<DriverPicture> {
                     : DecorationImage(
                         fit: BoxFit.cover,
                         image: Image.asset(
-                          "assets/images/1234.png",
+                          "assets/images/Vector.png",
                           fit: BoxFit.cover,
                         ).image,
                       ),
@@ -120,6 +120,12 @@ class _HomeActivityState extends State<DriverPicture> {
             Text(
               "Add profile picture",
               style: kTextStyleWhite,
+            ),
+            SizedBox(height: 25),
+            Text(
+              "Please upload your documentation\nMake sure photos are clear and visible",
+              style: kTextStyleWhite.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
             SizedBox(height: 20),
             InkWell(
@@ -149,8 +155,8 @@ class _HomeActivityState extends State<DriverPicture> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   options(
-                    hint: "License ID",
-                    hintPro: "Front",
+                    hint: "Drivers License",
+                    hintPro: "Front view",
                     showIcon: true,
                   ),
                   selectedLicenceFront
@@ -193,8 +199,8 @@ class _HomeActivityState extends State<DriverPicture> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   options(
-                    hint: "License ID",
-                    hintPro: "Back",
+                    hint: "Drivers License",
+                    hintPro: "Back view",
                     showIcon: true,
                   ),
                   selectedLicenseBack
@@ -211,16 +217,27 @@ class _HomeActivityState extends State<DriverPicture> {
                 ],
               ),
             ),
-            // options(
-            //   hint: "NRC Number",
-            //   hintPro: "NRC Number",
-            //   controller: nrcController,
-            // ),
-            options(
-              hint: "Address",
-              hintPro: "Address",
-              controller: nrcController,
-              // controller: nrcController,
+            SizedBox(height: 10),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(15)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: TextFormField(
+                  style: const TextStyle(
+                    color: Colors.black,
+                  ),
+                  controller: nrcController,
+                  decoration: InputDecoration(
+                    hintStyle: TextStyle(color: Colors.grey),
+                    fillColor: Colors.grey,
+                    border: InputBorder.none,
+                    hintText: "Address",
+                  ),
+                ),
+              ),
             ),
             SizedBox(height: 60),
             gradientButton(
@@ -250,41 +267,44 @@ class _HomeActivityState extends State<DriverPicture> {
             hint,
             style: kTextStyleWhite,
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(15)),
-            ),
-            child: Row(
-              children: [
-                Expanded(
+          Row(
+            children: [
+              SizedBox(
+                width: 100,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 25),
-                    child: TextFormField(
-                      style: const TextStyle(
-                        color: Colors.black,
-                      ),
-                      controller: controller,
-                      decoration: InputDecoration(
-                        hintStyle: TextStyle(color: Colors.grey),
-                        fillColor: Colors.grey,
-                        border: InputBorder.none,
-                        hintText: hintPro,
-                      ),
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text(hintPro, style: kTextStyleHint),
                     ),
                   ),
                 ),
-                showIcon
-                    ? const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: Icon(
-                          Icons.camera_alt,
-                          color: Colors.grey,
+              ),
+              showIcon
+                  ? Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: kBorderRadiusCircularPro,
                         ),
-                      )
-                    : Container(),
-              ],
-            ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Icon(
+                            Icons.camera_alt,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Container(),
+              Expanded(child: Container()),
+            ],
           ),
         ],
       ),

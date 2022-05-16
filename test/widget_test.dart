@@ -99,6 +99,13 @@ main() {
     var response = await _provider.getDriverTrips();
   });
 
+  test('driverArrivedAtDestination', () async {
+    var _provider = DriverProvider();
+    var response = await _provider.driverArrivedAtDestination(
+      requestTripId: 202,
+    );
+  });
+
   test('getDriverStats', () async {
     var _provider = DriverProvider();
     var response = await _provider.getDriverStats();

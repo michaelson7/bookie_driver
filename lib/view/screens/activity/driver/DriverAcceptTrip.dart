@@ -58,7 +58,7 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
   LocationProvider locationProvider = LocationProvider();
   bool isDriver = false;
   var total;
-  int tripCounter = 0, timerCounter = 0;
+  int tripCounter = 0, timerCounter = 0, baka = 1;
   String name = "userName";
   AllRequestTrip? allRequestTrip;
   _HomeActivityState(this.model, this.profilePhoto);
@@ -525,13 +525,6 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
                 hours: false,
                 minute: false,
               );
-              timerCounter++;
-              if (timerCounter > 50) {
-                if (displayTime == "00") {
-                  _stopWatchTimer.onExecute.add(StopWatchExecute.stop);
-                  //rejectTrip(context);
-                }
-              }
               return Container(
                 decoration: BoxDecoration(
                   border: Border.all(

@@ -66,12 +66,12 @@ flutter_icons:
 
 flutter_native_splash:
   background_image: assets/images/splashBackground.png
-  image: assets/images/splashImagePro.png
+  image: assets/images/splashImageProMax.png
   fullscreen: true
   android: true
   ios: true
-  web: false
-  android12: false
+  android12:
+    image: assets/images/splashImageProMax.png
 
 dev_dependencies:
   flutter_test:

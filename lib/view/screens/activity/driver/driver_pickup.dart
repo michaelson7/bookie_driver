@@ -16,6 +16,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:timeline_tile/timeline_tile.dart';
+import '../../../../provider/DriverProvider.dart';
 import '../../../../provider/GoogleMapProvider.dart';
 import '../../../../provider/TripProvider.dart';
 import '../../../constants/enum.dart';
@@ -305,7 +306,7 @@ class _HomeActivityState extends State<DriverPickUp> {
                           getVechileImage(
                                   carType: "${dataValue.vehicleClass?.name}") ??
                               "assets/images/car.png",
-                          height: 30,
+                          height: 25,
                         ),
                         Text(
                           "${destinationInformation?.totalDistance}",
@@ -391,67 +392,84 @@ class _HomeActivityState extends State<DriverPickUp> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          ElevatedButton(
-            onPressed: () {
-              openSMSorCallDialog(
-                context: context,
-                phoneNumber: "${model.user?.phoneNumber}",
-              );
-            },
-            style: ButtonStyle(
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+          SizedBox(
+            height: 50,
+            width: 130,
+            child: ElevatedButton(
+              onPressed: () {
+                openSMSorCallDialog(
+                  context: context,
+                  phoneNumber: "${model.user?.phoneNumber}",
+                );
+              },
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
                 ),
+                backgroundColor:
+                    MaterialStateProperty.all<Color>(const Color(0xFFFFD008)),
               ),
-              backgroundColor:
-                  MaterialStateProperty.all<Color>(const Color(0xFFFFD008)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: const [
-                  Icon(
-                    FontAwesome.phone,
-                    color: Colors.green,
-                  ),
-                  SizedBox(width: 20),
-                  Icon(
-                    FontAwesome.wechat,
-                    color: Colors.black,
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(
+                      FontAwesome.phone,
+                      color: Colors.green,
+                    ),
+                    SizedBox(width: 20),
+                    Icon(
+                      FontAwesome.wechat,
+                      color: Colors.black,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => UnnecessaryScreen(
-                    model: model,
-                    total: total.toString(),
-                    acceptTripId: acceptTripId,
-                    profilePhoto: profilePhoto,
+          SizedBox(
+            height: 50,
+            width: 130,
+            child: ElevatedButton(
+              onPressed: () async {
+                //SEND ARRIVED NOTIFICATION
+                var dialog = PopUpDialogs(context: context);
+                dialog.showLoadingAnimation(context: context);
+                var _provider = DriverProvider();
+                await _provider.driverArrivedAtDestination(
+                  requestTripId: model.id,
+                );
+                dialog.closeDialog();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UnnecessaryScreen(
+                      model: model,
+                      total: total.toString(),
+                      acceptTripId: acceptTripId,
+                      profilePhoto: profilePhoto,
+                    ),
+                  ),
+                );
+              },
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
                   ),
                 ),
-              );
-            },
-            style: ButtonStyle(
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
               ),
-              backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.all(12),
-              child: Center(
-                child: Text(
-                  "Arrived",
-                  textAlign: TextAlign.center,
+              child: const Padding(
+                padding: EdgeInsets.all(12),
+                child: Center(
+                  child: Text(
+                    "Arrived",
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ),
             ),

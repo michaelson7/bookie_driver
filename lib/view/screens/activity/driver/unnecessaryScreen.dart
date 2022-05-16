@@ -477,7 +477,7 @@ class _HomeActivityState extends State<UnnecessaryScreen> {
                 horizontal: 30,
                 vertical: 15,
               ),
-              child: Text("Stop Trip"),
+              child: Text("Cancel Trip"),
             ),
           ),
           ElevatedButton(
