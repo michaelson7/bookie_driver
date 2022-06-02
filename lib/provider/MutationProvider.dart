@@ -1,10 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:bookie_driver/provider/shared_prefrence_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
+import '../main.dart';
+import '../view/constants/constants.dart';
 import '../view/constants/enum.dart';
 import '../view/constants/mutations.dart';
 import '../view/widgets/GraphQLConfiguration.dart';
@@ -56,6 +60,113 @@ Future<QueryResult> MutationRequest({
   required mutation,
   required jsonBody,
 }) async {
+  try {
+    final result = await InternetAddress.lookup('example.com');
+    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      //loggerError(message: "NO INTERNET");
+    }
+  } on SocketException catch (_) {
+    var width = MediaQuery.of(navigatorKey.currentState!.context).size.width;
+    showDialog<void>(
+        context: navigatorKey.currentState!.context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: kAccent,
+            contentPadding: EdgeInsets.zero,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            content: Container(
+              width: width,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    height: 120,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: kAccent,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(10),
+                          topLeft: Radius.circular(10),
+                        ),
+                      ),
+                      child: Center(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(365)),
+                            color: Colors.yellow,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(
+                              MaterialIcons.signal_wifi_off,
+                              size: 40,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: kBorderRadiusCircular,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            'No Internet Connection',
+                            style: kTextStyleHeader2,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            "Please check your internet connection",
+                            style: kTextStyleHint,
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[400],
+                                      borderRadius: kBorderRadiusCircularPro,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "Close",
+                                        textAlign: TextAlign.center,
+                                        style: kTextStyleWhite,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   try {
     var isTokenValid = await checkToken();
   } catch (e) {}

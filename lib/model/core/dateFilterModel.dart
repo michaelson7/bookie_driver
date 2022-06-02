@@ -29,6 +29,7 @@ class DateFilter {
     this.typename,
     this.start,
     this.end,
+    this.driver,
     this.amount,
     required this.type,
     this.createdDate,
@@ -40,6 +41,7 @@ class DateFilter {
   End? start;
   String type;
   End? end;
+  Driver? driver;
   String? amount;
   DateTime? createdDate;
   DateTime? modifiedDate;
@@ -48,6 +50,7 @@ class DateFilter {
   factory DateFilter.fromJson(Map<String, dynamic> json) => DateFilter(
         typename: json["__typename"] == null ? null : json["__typename"],
         type: json["type"] == null ? null : json["type"],
+        driver: json["driver"] == null ? null : Driver.fromJson(json["driver"]),
         amount: json["amount"] == null ? null : json["amount"],
         start: json["start"] == null ? null : End.fromJson(json["start"]),
         end: json["end"] == null ? null : End.fromJson(json["end"]),
@@ -75,6 +78,43 @@ class DateFilter {
             ? null
             : List<dynamic>.from(driverratingsSet!.map((x) => x.toJson())),
       };
+}
+
+class Driver {
+  Driver({
+    this.typename,
+    this.drivervehicleSet,
+  });
+
+  String? typename;
+  List<DrivervehicleSet>? drivervehicleSet;
+
+  factory Driver.fromJson(Map<String, dynamic> json) => Driver(
+        typename: json["__typename"] == null ? null : json["__typename"],
+        drivervehicleSet: json["drivervehicleSet"] == null
+            ? null
+            : List<DrivervehicleSet>.from(json["drivervehicleSet"]
+                .map((x) => DrivervehicleSet.fromJson(x))),
+      );
+}
+
+class DrivervehicleSet {
+  DrivervehicleSet({
+    this.typename,
+    this.modelName,
+    this.modelColor,
+  });
+
+  String? typename;
+  String? modelName;
+  String? modelColor;
+
+  factory DrivervehicleSet.fromJson(Map<String, dynamic> json) =>
+      DrivervehicleSet(
+        typename: json["__typename"] == null ? null : json["__typename"],
+        modelName: json["modelName"] == null ? null : json["modelName"],
+        modelColor: json["modelColor"] == null ? null : json["modelColor"],
+      );
 }
 
 class DriverratingsSet {

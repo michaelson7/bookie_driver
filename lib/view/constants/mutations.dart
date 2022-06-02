@@ -264,8 +264,10 @@ query {
     vehicleClass{
       name
       vehiclebasepriceSet{
-        price,
-        rate
+      businessToCustomerRate,
+      businessToBusinessRate,
+      businessToCustomerPrice,
+      businessToBusinessPrice
       }
     }
     type,
@@ -433,6 +435,12 @@ query{
       name
     },
     createdDate,
+    driver{
+      drivervehicleSet{
+        modelName,
+        modelColor
+      }
+    },
     amount,
     modifiedDate,
     driverratingsSet{
@@ -447,6 +455,12 @@ query{
       name
     },
     amount,
+      driver{
+      drivervehicleSet{
+        modelName,
+        modelColor
+      }
+    },
     createdDate,
     modifiedDate,
     driverratingsSet{
@@ -515,6 +529,12 @@ query uploadProfilePicture(
     }
     end{
       name
+    },
+    driver{
+      drivervehicleSet{
+        modelName,
+        modelColor
+      }
     },
     type,
     createdDate,

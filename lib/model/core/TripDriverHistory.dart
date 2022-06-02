@@ -38,6 +38,7 @@ class The2BTrip {
     this.typename,
     this.start,
     this.end,
+    this.driver,
     required this.createdDate,
     required this.amount,
     required this.modifiedDate,
@@ -47,6 +48,7 @@ class The2BTrip {
   B2BTripTypename? typename;
   End? start;
   End? end;
+  Driver? driver;
   DateTime? createdDate;
   String amount;
   DateTime? modifiedDate;
@@ -58,6 +60,7 @@ class The2BTrip {
             : b2BTripTypenameValues.map![json["__typename"]],
         start: json["start"] == null ? null : End.fromJson(json["start"]),
         end: json["end"] == null ? null : End.fromJson(json["end"]),
+        driver: json["driver"] == null ? null : Driver.fromJson(json["driver"]),
         createdDate: json["createdDate"] == null
             ? null
             : DateTime.parse(json["createdDate"]),
@@ -85,6 +88,43 @@ class The2BTrip {
             ? null
             : List<dynamic>.from(driverratingsSet!.map((x) => x.toJson())),
       };
+}
+
+class Driver {
+  Driver({
+    this.typename,
+    this.drivervehicleSet,
+  });
+
+  String? typename;
+  List<DrivervehicleSet>? drivervehicleSet;
+
+  factory Driver.fromJson(Map<String, dynamic> json) => Driver(
+        typename: json["__typename"] == null ? null : json["__typename"],
+        drivervehicleSet: json["drivervehicleSet"] == null
+            ? null
+            : List<DrivervehicleSet>.from(json["drivervehicleSet"]
+                .map((x) => DrivervehicleSet.fromJson(x))),
+      );
+}
+
+class DrivervehicleSet {
+  DrivervehicleSet({
+    this.typename,
+    this.modelName,
+    this.modelColor,
+  });
+
+  String? typename;
+  String? modelName;
+  String? modelColor;
+
+  factory DrivervehicleSet.fromJson(Map<String, dynamic> json) =>
+      DrivervehicleSet(
+        typename: json["__typename"] == null ? null : json["__typename"],
+        modelName: json["modelName"] == null ? null : json["modelName"],
+        modelColor: json["modelColor"] == null ? null : json["modelColor"],
+      );
 }
 
 class DriverratingsSet {

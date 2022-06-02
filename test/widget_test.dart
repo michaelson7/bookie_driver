@@ -118,7 +118,7 @@ main() {
 
   test('dateFilte', () async {
     var _provider = DriverProvider();
-    var response = await _provider.dateFilte(filter: "week");
+    var response = await _provider.dateFilte(filter: "");
   });
 
   test('updateTripRequest', () async {

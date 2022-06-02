@@ -486,6 +486,12 @@ class _DriverDashboardState extends State<DriverDashboard> {
           DateTime dateTime =
               dateFormat.parse(dataValue!.createdDate!.toString());
           return tripData(
+            car: dataValue.driver!.drivervehicleSet!.isNotEmpty
+                ? "${dataValue.driver?.drivervehicleSet?.first.modelName}"
+                : "",
+            carColor: dataValue.driver!.drivervehicleSet!.isNotEmpty
+                ? "${dataValue.driver?.drivervehicleSet?.first.modelColor}"
+                : "",
             time:
                 "${dateTime.hour.toString().padLeft(2, "0")}:${dateTime.minute.toString().padRight(2, "0")}",
             location: "${dataValue?.start?.name} - ${dataValue?.end?.name}",
@@ -719,6 +725,12 @@ class _DriverDashboardState extends State<DriverDashboard> {
         DateTime dateTime =
             dateFormat.parse(dataValue!.createdDate!.toString());
         return tripData(
+          car: dataValue.driver!.drivervehicleSet!.isNotEmpty
+              ? "${dataValue.driver?.drivervehicleSet?.first.modelName}"
+              : "",
+          carColor: dataValue.driver!.drivervehicleSet!.isNotEmpty
+              ? "${dataValue.driver?.drivervehicleSet?.first.modelColor}"
+              : "",
           time:
               "${dateTime.hour}:${dateTime.minute.toString().padRight(2, "0")}",
           location: "${dataValue?.start?.name} - ${dataValue?.end?.name}",

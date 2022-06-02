@@ -7,6 +7,8 @@ Widget tripData({
   required String time,
   required String location,
   required String amount,
+  required car,
+  required carColor,
   double ratingVal = 0.0,
 }) {
   var timeVal = int.parse(time.split(":")[0]);
@@ -32,7 +34,8 @@ Widget tripData({
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: paddedText(
                 top: Text(
-                  location,
+                  "${location}",
+                  textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white),
                 ),
                 bottom: StarRating(

@@ -64,7 +64,7 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
   _HomeActivityState(this.model, this.profilePhoto);
   final StopWatchTimer _stopWatchTimer = StopWatchTimer(
     mode: StopWatchMode.countDown,
-    presetMillisecond: StopWatchTimer.getMilliSecFromSecond(30),
+    presetMillisecond: StopWatchTimer.getMilliSecFromSecond(10),
   ); // Create instance.
   Completer<GoogleMapController> _mapController = Completer();
   Marker? originMarker, destinationMarker;
@@ -137,9 +137,9 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
     );
     var destinationDistance = tripData!.totalDistance.split(" ").first;
     double rate = double.parse(model.allRequestTrip![tripCounter].vehicleClass!
-        .vehiclebasepriceSet!.first.rate);
+        .vehiclebasepriceSet!.first.businessToCustomerRate!);
     double min = double.parse(model.allRequestTrip![tripCounter].vehicleClass!
-        .vehiclebasepriceSet!.first.price);
+        .vehiclebasepriceSet!.first.businessToCustomerPrice!);
     setState(() {
       //totalTime = "3";
       destinationMarker = destinationResult;
@@ -525,6 +525,7 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
                 hours: false,
                 minute: false,
               );
+
               return Container(
                 decoration: BoxDecoration(
                   border: Border.all(

@@ -15,6 +15,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:timeline_tile/timeline_tile.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../provider/GoogleMapProvider.dart';
 import '../../../../provider/TripProvider.dart';
@@ -27,6 +28,7 @@ import '../../../widgets/directions_repository.dart';
 import '../../../widgets/dragContainerBody.dart';
 import '../../../widgets/gradientContainer.dart';
 import '../../../widgets/side_navigation.dart';
+import '../../../widgets/toast.dart';
 import '../../../widgets/vechileImageFetcher.dart';
 
 class OnTrip extends StatefulWidget {
@@ -282,6 +284,32 @@ class _HomeActivityState extends State<OnTrip> {
                     Icon(FontAwesome.circle_o, color: Colors.yellow, size: 15),
                   ],
                 ),
+                dataValue.type.toString() == "BusinessToBusiness"
+                    ? dataValue.businessrequesttripSet!.isNotEmpty
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 15),
+                              const Text(
+                                "Downloadable File:",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  var url = dataValue
+                                      .businessrequesttripSet?.first.file;
+                                  await _launchURL(url);
+                                },
+                                child: Text("Open File"),
+                              ),
+                            ],
+                          )
+                        : const Text("NO FILE UPLOADED", style: kTextStyleWhite)
+                    : const SizedBox(height: 0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -331,7 +359,8 @@ class _HomeActivityState extends State<OnTrip> {
                         children: [
                           Image.asset(
                             getVechileImage(
-                                carType: "${dataValue.vehicleClass?.name}") ??
+                                    carType:
+                                        "${dataValue.vehicleClass?.name}") ??
                                 "assets/images/car.png",
                             height: 30,
                           ),
@@ -471,10 +500,10 @@ class _HomeActivityState extends State<OnTrip> {
     );
     destinationDistance = tripData!.totalDistance.split(" ")[0];
     double rate = double.parse(
-      model.vehicleClass!.vehiclebasepriceSet!.first.rate,
+      model.vehicleClass!.vehiclebasepriceSet!.first.businessToCustomerRate!,
     );
     double min = double.parse(
-      model.vehicleClass!.vehiclebasepriceSet!.first.price,
+      model.vehicleClass!.vehiclebasepriceSet!.first.businessToCustomerPrice!,
     );
     setState(() {
       //totalTime = "3";
@@ -521,6 +550,15 @@ class _HomeActivityState extends State<OnTrip> {
       Navigator.popAndPushNamed(context, DriverHomeInit.id);
     }
   }
-}
 
-//
+  _launchURL(url) async {
+    try {
+      await launch(
+        url,
+        enableJavaScript: true,
+      );
+    } catch (e) {
+      toastMessage(context: context, message: "Could not open file");
+    }
+  }
+}

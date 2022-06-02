@@ -122,10 +122,10 @@ class _HomeActivityState extends State<DriverPickUp> {
     );
     var destinationDistance = tripData!.totalDistance.split(" ")[0];
     double rate = double.parse(
-      model.vehicleClass!.vehiclebasepriceSet!.first.rate,
+      model.vehicleClass!.vehiclebasepriceSet!.first.businessToCustomerRate!,
     );
     double min = double.parse(
-      model.vehicleClass!.vehiclebasepriceSet!.first.price,
+      model.vehicleClass!.vehiclebasepriceSet!.first.businessToCustomerPrice!,
     );
     setState(() {
       //totalTime = "3";

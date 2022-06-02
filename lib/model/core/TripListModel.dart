@@ -159,25 +159,45 @@ class VehicleClass {
 class VehiclebasepriceSet {
   VehiclebasepriceSet({
     required this.typename,
-    required this.price,
-    required this.rate,
+    this.businessToCustomerRate,
+    this.businessToBusinessRate,
+    this.businessToCustomerPrice,
+    this.businessToBusinessPrice,
   });
 
   String typename;
-  String price;
-  String rate;
+  String? businessToCustomerRate;
+  String? businessToBusinessRate;
+  String? businessToCustomerPrice;
+  String? businessToBusinessPrice;
 
   factory VehiclebasepriceSet.fromJson(Map<String, dynamic> json) =>
       VehiclebasepriceSet(
         typename: json["__typename"] == null ? null : json["__typename"],
-        price: json["price"] == null ? null : json["price"],
-        rate: json["rate"] == null ? null : json["rate"],
+        businessToCustomerRate: json["businessToCustomerRate"] == null
+            ? null
+            : json["businessToCustomerRate"],
+        businessToBusinessRate: json["businessToBusinessRate"] == null
+            ? null
+            : json["businessToBusinessRate"],
+        businessToCustomerPrice: json["businessToCustomerPrice"] == null
+            ? null
+            : json["businessToCustomerPrice"],
+        businessToBusinessPrice: json["businessToBusinessPrice"] == null
+            ? null
+            : json["businessToBusinessPrice"],
       );
 
   Map<String, dynamic> toJson() => {
         "__typename": typename == null ? null : typename,
-        "price": price == null ? null : price,
-        "rate": rate == null ? null : rate,
+        "businessToCustomerRate":
+            businessToCustomerRate == null ? null : businessToCustomerRate,
+        "businessToBusinessRate":
+            businessToBusinessRate == null ? null : businessToBusinessRate,
+        "businessToCustomerPrice":
+            businessToCustomerPrice == null ? null : businessToCustomerPrice,
+        "businessToBusinessPrice":
+            businessToBusinessPrice == null ? null : businessToBusinessPrice,
       };
 }
 
