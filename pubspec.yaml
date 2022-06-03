@@ -62,7 +62,7 @@ flutter_icons:
   android: "launcher_icon"
   ios: true
   remove_alpha_ios: true
-  image_path: "assets/images/logo.png"
+  image_path: "assets/images/logoProMax.png"
   adaptive_icon_background: "#714664"
 
 flutter_native_splash:

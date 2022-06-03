@@ -32,6 +32,7 @@ import '../../../widgets/directions_repository.dart';
 import '../../../widgets/dragContainerBody.dart';
 import '../../../widgets/gradientContainer.dart';
 import '../../../widgets/logger_widget.dart';
+import '../../../widgets/navigator.dart';
 import '../../../widgets/side_navigation.dart';
 import '../../../widgets/vechileImageFetcher.dart';
 import 'driver_pickup.dart';
@@ -64,7 +65,7 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
   _HomeActivityState(this.model, this.profilePhoto);
   final StopWatchTimer _stopWatchTimer = StopWatchTimer(
     mode: StopWatchMode.countDown,
-    presetMillisecond: StopWatchTimer.getMilliSecFromSecond(10),
+    presetMillisecond: StopWatchTimer.getMilliSecFromSecond(30),
   ); // Create instance.
   Completer<GoogleMapController> _mapController = Completer();
   Marker? originMarker, destinationMarker;
@@ -424,6 +425,17 @@ class _HomeActivityState extends State<DriverAcceptTrip> {
                   height: dataValue.type.toString() == "BusinessToBusiness"
                       ? 15
                       : 0,
+                ),
+                navigator(
+                  context: context,
+                  Startlat: model
+                      .allRequestTrip![tripCounter].pickupLocation!.latitude,
+                  Startlong: model
+                      .allRequestTrip![tripCounter].pickupLocation!.longitude,
+                  Endlat:
+                      model.allRequestTrip![tripCounter].endLocation!.latitude,
+                  Endlong:
+                      model.allRequestTrip![tripCounter].endLocation!.longitude,
                 ),
                 Row(
                   children: [

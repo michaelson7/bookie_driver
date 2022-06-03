@@ -30,6 +30,7 @@ import '../../../widgets/directions_repository.dart';
 import '../../../widgets/dragContainerBody.dart';
 import '../../../widgets/gradientContainer.dart';
 import '../../../widgets/logger_widget.dart';
+import '../../../widgets/navigator.dart';
 import '../../../widgets/side_navigation.dart';
 import '../../../widgets/vechileImageFetcher.dart';
 import 'DriverHomeInit.dart';
@@ -358,6 +359,13 @@ class _HomeActivityState extends State<UnnecessaryScreen> {
                   ],
                 ),
                 SizedBox(height: 15),
+                navigator(
+                  context: context,
+                  Startlat: model.pickupLocation!.latitude,
+                  Startlong: model.pickupLocation!.longitude,
+                  Endlat: model.endLocation!.latitude,
+                  Endlong: model.endLocation!.longitude,
+                ),
                 Row(
                   children: [
                     dataValue.type.toString() == "BusinessToBusiness"

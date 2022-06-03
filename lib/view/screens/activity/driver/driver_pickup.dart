@@ -25,6 +25,7 @@ import '../../../widgets/directions_repository.dart';
 import '../../../widgets/dragContainerBody.dart';
 import '../../../widgets/gradientContainer.dart';
 import '../../../widgets/makeCall.dart';
+import '../../../widgets/navigator.dart';
 import '../../../widgets/openSMSorCallDialog.dart';
 import '../../../widgets/side_navigation.dart';
 import '../../../widgets/vechileImageFetcher.dart';
@@ -291,6 +292,13 @@ class _HomeActivityState extends State<DriverPickUp> {
                   ],
                 ),
                 SizedBox(height: 15),
+                navigator(
+                  context: context,
+                  Startlat: model.pickupLocation!.latitude,
+                  Startlong: model.pickupLocation!.longitude,
+                  Endlat: model.endLocation!.latitude,
+                  Endlong: model.endLocation!.longitude,
+                ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
