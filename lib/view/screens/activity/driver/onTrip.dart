@@ -310,18 +310,11 @@ class _HomeActivityState extends State<OnTrip> {
                             ],
                           )
                         : const Text("NO FILE UPLOADED", style: kTextStyleWhite)
-                    : const SizedBox(height: 0),
+                    : const SizedBox(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    navigator(
-                      context: context,
-                      Startlat: model.pickupLocation!.latitude,
-                      Startlong: model.pickupLocation!.longitude,
-                      Endlat: model.endLocation!.latitude,
-                      Endlong: model.endLocation!.longitude,
-                    ),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 7),
                       child: Column(
