@@ -42,7 +42,7 @@ dependencies:
   flutter_native_splash: ^2.0.2
   flutter_svg: ^1.0.3
   flare_flutter: ^3.0.2
-  location: ^4.2.0
+  location: ^4.4.0
   dotted_border: ^2.0.0+2
   flutter_countdown_timer: ^4.1.0
   chat_bubbles: ^1.2.0

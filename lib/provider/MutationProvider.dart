@@ -146,7 +146,7 @@ Future<QueryResult> MutationRequest({
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
-                                        "Close",
+                                        "Retry",
                                         textAlign: TextAlign.center,
                                         style: kTextStyleWhite,
                                       ),

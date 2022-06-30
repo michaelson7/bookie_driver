@@ -302,12 +302,19 @@ class _HomeActivityState extends State<DriverPickUp> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Expanded(
-                      child: Text(
-                        "ZMW ${total}",
-                        style: kTextStyleWhite,
-                      ),
-                    ),
+                    dataValue.type.toString() == "BusinessToBusiness"
+                        ? Expanded(
+                            child: Text(
+                              "ZMW -",
+                              style: kTextStyleWhite,
+                            ),
+                          )
+                        : Expanded(
+                            child: Text(
+                              "ZMW $total",
+                              style: kTextStyleWhite,
+                            ),
+                          ),
                     Column(
                       children: [
                         Image.asset(

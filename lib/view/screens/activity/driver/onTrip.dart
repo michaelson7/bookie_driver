@@ -291,6 +291,27 @@ class _HomeActivityState extends State<OnTrip> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 15),
+                              navigator(
+                                context: context,
+                                Startlat: dataValue.pickupLocation!.latitude,
+                                Startlong: dataValue.pickupLocation!.longitude,
+                                Endlat: dataValue.endLocation!.latitude,
+                                Endlong: dataValue.endLocation!.longitude,
+                              ),
+                              const SizedBox(height: 15),
+                              dataValue.type.toString() == "BusinessToBusiness"
+                                  ? dataValue.businessrequesttripSet!.isNotEmpty
+                                      ? Text(
+                                          "Trip Description:\n${dataValue.businessrequesttripSet?.first.tripDescription}",
+                                          textAlign: TextAlign.left,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                          ),
+                                        )
+                                      : const Text("NO TRIP DESCRIPTION")
+                                  : const SizedBox(height: 0),
+                              const SizedBox(height: 15),
                               const Text(
                                 "Downloadable File:",
                                 textAlign: TextAlign.left,
