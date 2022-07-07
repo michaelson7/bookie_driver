@@ -285,19 +285,19 @@ class _HomeActivityState extends State<OnTrip> {
                     Icon(FontAwesome.circle_o, color: Colors.yellow, size: 15),
                   ],
                 ),
+                const SizedBox(height: 15),
+                navigator(
+                  context: context,
+                  Startlat: dataValue.pickupLocation!.latitude,
+                  Startlong: dataValue.pickupLocation!.longitude,
+                  Endlat: dataValue.endLocation!.latitude,
+                  Endlong: dataValue.endLocation!.longitude,
+                ),
                 dataValue.type.toString() == "BusinessToBusiness"
                     ? dataValue.businessrequesttripSet!.isNotEmpty
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(height: 15),
-                              navigator(
-                                context: context,
-                                Startlat: dataValue.pickupLocation!.latitude,
-                                Startlong: dataValue.pickupLocation!.longitude,
-                                Endlat: dataValue.endLocation!.latitude,
-                                Endlong: dataValue.endLocation!.longitude,
-                              ),
                               const SizedBox(height: 15),
                               dataValue.type.toString() == "BusinessToBusiness"
                                   ? dataValue.businessrequesttripSet!.isNotEmpty
