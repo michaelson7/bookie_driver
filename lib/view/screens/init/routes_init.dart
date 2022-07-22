@@ -24,6 +24,7 @@ import '../../../provider/shared_prefrence_provider.dart';
 import '../../constants/constants.dart';
 import '../../widgets/logger_widget.dart';
 import '../activity/driver/DriverWallet.dart';
+import '../activity/driver/contactUs.dart';
 import '../activity/driver/driverPasswordReset.dart';
 import '../activity/driver/driver_picture.dart';
 import '../activity/driver/profileScreen.dart';
@@ -92,6 +93,7 @@ class _RoutesInitState extends State<RoutesInit> {
               MessageScreen.id: (context) => MessageScreen(),
               CallScreen.id: (context) => CallScreen(),
               ProfileScreen.id: (context) => ProfileScreen(),
+              ContactUs.id: (context) => ContactUs(),
             },
           );
   }

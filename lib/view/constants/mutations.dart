@@ -136,6 +136,17 @@ query{
 }
 """;
 
+String contactDetails = """
+ query {
+ contactDetails{
+  description,
+  email,
+  phone,
+  address
+}
+}
+""";
+
 String addDriverVehicle = """
 mutation addDriverVehicle(
   \$vehicleClass: ID!, 

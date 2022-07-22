@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../constants/constants.dart';
@@ -12,22 +11,13 @@ class PopUpDialogs {
     required BuildContext context,
   }) {
     showDialog(
-      barrierDismissible: false,
+      barrierDismissible: true,
       context: context,
       builder: (builder) {
         return AlertDialog(
-          content: SizedBox(
-            // height: 20,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const CircularProgressIndicator(color: kPrimary),
-                const SizedBox(width: 20),
-                Text(message),
-              ],
-            ),
-          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          content: Image.asset("assets/images/505.gif", height: 120.0),
         );
       },
     );

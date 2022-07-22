@@ -22,6 +22,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../model/service/setFireBase.dart';
 import '../../../constants/enum.dart';
@@ -62,6 +63,7 @@ class _HomeActivityState extends State<DriverHomeInit>
   Marker? originMarker, destinationMarker;
   Directions? destinationInformation;
   GoogleMapsProvider googleMapsProvider = GoogleMapsProvider();
+  PackageInfo? packageInfo;
 
   @override
   void initState() {
@@ -101,6 +103,7 @@ class _HomeActivityState extends State<DriverHomeInit>
 
   UpdateDriverLocation() async {
     //FIREBASE
+    packageInfo = await PackageInfo.fromPlatform();
     var _spProvider = SharedPreferenceProvider();
     var number = await _spProvider.getStringValue(
       getEnumValue(UserDetails.number),
@@ -239,6 +242,7 @@ class _HomeActivityState extends State<DriverHomeInit>
       ),
       drawer: buildDrawer(
         context: context,
+        packageInfo: packageInfo,
         isDriver: isDriver,
         profilePhoto: profilePhoto,
         userName: name,

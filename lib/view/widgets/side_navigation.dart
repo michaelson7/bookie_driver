@@ -2,13 +2,14 @@ import 'package:bookie_driver/view/screens/activity/driver/DriverWallet.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../provider/shared_prefrence_provider.dart';
 import '../constants/constants.dart';
 import '../screens/activity/driver/DriverHomeInit.dart';
+import '../screens/activity/driver/contactUs.dart';
 import '../screens/activity/driver/driver_dashboard.dart';
 import '../screens/activity/driver/profileScreen.dart';
-import '../screens/activity/paymentSelection/payment_selection_activity.dart';
 import '../screens/activity/setup/login_activity.dart';
 import 'logger_widget.dart';
 
@@ -17,7 +18,9 @@ Drawer buildDrawer({
   required bool isDriver,
   required profilePhoto,
   required userName,
+  PackageInfo? packageInfo,
 }) {
+  String version = packageInfo?.version ?? "";
   return Drawer(
     child: Container(
       decoration: BoxDecoration(
@@ -117,20 +120,27 @@ Drawer buildDrawer({
               await Navigator.pushNamed(context, DriverWallet.id);
             },
           ),
-          menuButton(
-            title: "Settings",
-            icon: FontAwesome.cog,
-            function: () {},
-          ),
+          // menuButton(
+          //   title: "Settings",
+          //   icon: FontAwesome.cog,
+          //   function: () {},
+          // ),
+          // menuButton(
+          //   title: "Help and Support",
+          //   icon: Icons.supervised_user_circle_outlined,
+          //   function: () {},
+          // ),
+          // menuButton(
+          //   title: "About",
+          //   icon: FontAwesome.info,
+          //   function: () {},
+          // ),
           menuButton(
             title: "Help and Support",
             icon: Icons.supervised_user_circle_outlined,
-            function: () {},
-          ),
-          menuButton(
-            title: "About",
-            icon: FontAwesome.info,
-            function: () {},
+            function: () {
+              Navigator.popAndPushNamed(context, ContactUs.id);
+            },
           ),
           menuButton(
               title: "Logout",
@@ -147,7 +157,7 @@ Drawer buildDrawer({
           Center(
             child: Column(
               children: [
-                Text("Version : 1.0.0", style: TextStyle(fontSize: 13)),
+                Text("Version : ${version}", style: TextStyle(fontSize: 13)),
               ],
             ),
           )

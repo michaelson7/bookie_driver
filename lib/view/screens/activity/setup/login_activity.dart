@@ -251,8 +251,8 @@ class _HomeActivityState extends State<LoginActivity> {
           );
           popUpDialogs.closeDialog();
           if (userDataModel.me!.driverSet!.isNotEmpty) {
-            toastMessage(
-                context: context, message: "Authentication Successful");
+            // toastMessage(
+            //     context: context, message: "Authentication Successful");
             _sharedPreferenceProvider.setString(
               key: "AccountType",
               value: "driver",
